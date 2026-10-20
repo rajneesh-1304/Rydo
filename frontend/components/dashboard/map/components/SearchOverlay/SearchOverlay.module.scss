@@ -1,0 +1,203 @@
+.searchOverlay {
+    position: absolute;
+    top: 36px;
+    right: 36px;
+    z-index: 1000;
+    width: calc(100% - 40px);
+    max-width: 380px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.overlayHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.overlayTitle {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a;
+}
+
+.badgeGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.statusChip {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background-color: #ecfdf5;
+    color: #059669;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inputField {
+    width: 100%;
+
+    :global(.MuiOutlinedInput-root) {
+        border-radius: 12px;
+        background-color: #f8fafc;
+        font-size: 13.5px;
+        transition: all 0.2s ease;
+
+        fieldset {
+            border-color: #e2e8f0;
+        }
+
+        &:hover fieldset {
+            border-color: #cbd5e1;
+        }
+
+        &.Mui-focused fieldset {
+            border-color: #000000;
+            border-width: 1.5px;
+            background-color: #ffffff;
+        }
+    }
+
+    :global(.MuiInputBase-input) {
+        padding: 10px 8px;
+        &::placeholder {
+            color: #94a3b8;
+            opacity: 1;
+        }
+    }
+}
+
+.pickupDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #10b981;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.dropoffDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background-color: #ef4444;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.quickActionsRow {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 2px;
+    margin-top: -4px;
+    margin-bottom: 2px;
+}
+
+.currentLocationBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #059669;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.submitBtn {
+    border-radius: 12px !important;
+    padding: 11px 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+        background-color: #1e293b !important;
+    }
+
+    &:disabled {
+        background-color: #e2e8f0 !important;
+        color: #94a3b8 !important;
+        cursor: not-allowed !important;
+    }
+}
+
+.routeInfoBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 2px;
+}
+
+.routeMetrics {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.metricItem {
+    display: flex;
+    flex-direction: column;
+}
+
+.metricLabel {
+    font-size: 10px !important;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.metricValue {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #0f172a;
+}
+
+.resetRouteBtn {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #ef4444 !important;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+@media (max-width: 600px) {
+    .searchOverlay {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        width: calc(100% - 24px);
+        padding: 14px;
+    }
+}

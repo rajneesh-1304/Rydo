@@ -1,0 +1,29 @@
+.controlsContainer {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.controlBtn {
+    width: 42px !important;
+    height: 42px !important;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-radius: 50% !important;
+    border: 1px solid #e2e8f0 !important;
+
+    &:hover {
+        background-color: #f8fafc !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .controlsContainer {
+        bottom: 12px;
+        right: 12px;
+    }
+}
