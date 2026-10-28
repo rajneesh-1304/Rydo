@@ -1,0 +1,762 @@
+.pageContainer {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  background-color: #f3f4f6;
+  padding: 16px 20px;
+  box-sizing: border-box;
+
+  @media screen and (max-width: 900px) {
+    padding: 12px 10px;
+    min-height: auto;
+  }
+}
+
+.mainGrid {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 450px 1fr;
+  gap: 18px;
+  min-height: calc(100vh - 96px);
+
+  @media screen and (max-width: 960px) {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    min-height: auto;
+  }
+}
+
+.bookingCard {
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  min-height: 520px;
+
+  @media screen and (max-width: 960px) {
+    min-height: auto;
+    padding: 18px 16px;
+    border-radius: 14px;
+  }
+
+  @media screen and (max-width: 480px) {
+    padding: 16px 12px;
+  }
+}
+
+.mapCard {
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  position: relative;
+  min-height: 520px;
+  border: 1px solid #eef2f6;
+
+  @media screen and (max-width: 960px) {
+    min-height: 320px;
+    height: 360px;
+    border-radius: 14px;
+  }
+
+  @media screen and (max-width: 480px) {
+    min-height: 280px;
+    height: 300px;
+  }
+}
+
+.cardHeader {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px !important;
+
+  @media screen and (max-width: 480px) {
+    font-size: 18px !important;
+  }
+}
+
+.subtitle {
+  font-size: 13px !important;
+  color: #64748b;
+  margin: 0 !important;
+
+  @media screen and (max-width: 480px) {
+    font-size: 12px !important;
+  }
+}
+
+/* Location inputs */
+.locationBox {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  margin-bottom: 12px;
+
+  @media screen and (max-width: 480px) {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .locRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .dotGreen {
+      width: 10px;
+      height: 10px;
+      background-color: #10b981;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dotRed {
+      width: 10px;
+      height: 10px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .locText {
+      flex: 1;
+      min-width: 0;
+
+      .locLabel {
+        font-size: 10px;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+
+      .locInput {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        outline: none;
+        padding: 2px 0;
+        box-sizing: border-box;
+
+        @media screen and (max-width: 480px) {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+
+  .divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin-left: 20px;
+  }
+
+  .swapBtn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f1f5f9;
+      color: #000000;
+    }
+  }
+}
+
+/* Quick destination chips */
+.chipsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+
+  .chipLabel {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .locChip {
+    font-size: 11px;
+    font-weight: 500;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 3px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      background-color: #e2e8f0;
+      color: #0f172a;
+    }
+  }
+}
+
+/* Route summary badge when searched */
+.routeSummaryPill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #166534;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .editRouteBtn {
+    background: none;
+    border: none;
+    color: #15803d;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 12px;
+  }
+}
+
+/* Cab Selection */
+.cabSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 10px;
+}
+
+.cabGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+
+  @media screen and (max-width: 440px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.cabCard {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  &:hover {
+    border-color: #94a3b8;
+    background-color: #f8fafc;
+  }
+
+  &.activeCab {
+    border-color: #000000;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+
+  .cabIconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+
+  .cabDetails {
+    flex: 1;
+    min-width: 0;
+
+    .cabName {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .cabEta {
+      font-size: 11px;
+      color: #64748b;
+    }
+  }
+
+  .cabPrice {
+    font-size: 14px;
+    font-weight: 800;
+    color: #000000;
+  }
+}
+
+/* Primary and Secondary Buttons */
+.primaryBtn {
+  width: 100%;
+  height: 44px;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s !important;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: #333333 !important;
+  }
+
+  &:disabled {
+    background-color: #94a3b8 !important;
+    cursor: not-allowed;
+  }
+}
+
+.secondaryBtn {
+  width: 100%;
+  height: 44px;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s !important;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: #f9fafb !important;
+    border-color: #d1d5db !important;
+  }
+}
+
+/* Search Prompt Placeholder when not searched */
+.searchPromptCard {
+  background-color: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 20px 14px;
+  text-align: center;
+  margin-bottom: 16px;
+
+  .searchPromptTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .searchPromptDesc {
+    font-size: 12px;
+    color: #64748b;
+  }
+}
+
+/* Screen 3: Finding Driver Status */
+.findingCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+
+  .findingHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .cabInfo {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .cabFare {
+      font-size: 17px;
+      font-weight: 800;
+      color: #000000;
+    }
+  }
+
+  .statusList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .statusItem {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #64748b;
+
+      &.statusDone {
+        color: #10b981;
+        font-weight: 600;
+      }
+
+      &.statusCurrent {
+        color: #000000;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+/* Screen 4: Driver on the way */
+.driverCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  .driverHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .driverAvatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .driverMeta {
+      flex: 1;
+      min-width: 0;
+
+      .driverName {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .driverRating {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .vehiclePlate {
+        font-size: 11px;
+        font-weight: 600;
+        color: #334155;
+      }
+    }
+
+    .driverActions {
+      display: flex;
+      gap: 6px;
+
+      button {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #111827;
+
+        &:hover {
+          background-color: #f3f4f6;
+        }
+      }
+    }
+  }
+
+  .routeSummary {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: #334155;
+
+    .point {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+/* Screen 5: Completed */
+.completedCard {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+
+  .greenBadge {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #10b981;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+
+  .fareBox {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    width: 100%;
+
+    .fareLabel {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .fareNumber {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 4px 0;
+    }
+
+    .paidVia {
+      font-size: 12px;
+      color: #10b981;
+      font-weight: 600;
+    }
+  }
+
+  .starsRow {
+    display: flex;
+    gap: 6px;
+    cursor: pointer;
+
+    .star {
+      font-size: 26px;
+      color: #cbd5e1;
+
+      &.filled {
+        color: #f59e0b;
+      }
+    }
+  }
+}
+
+/* Cancel Ride Confirmation Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.cancelModalCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media screen and (max-width: 480px) {
+    padding: 20px 16px;
+  }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cancelIconWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #fee2e2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.cancelTitle {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px !important;
+}
+
+.cancelDesc {
+  font-size: 13px !important;
+  color: #64748b;
+  line-height: 1.5 !important;
+}
+
+.cancelReasonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reasonOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  background-color: #f8fafc;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background-color: #f1f5f9;
+  }
+
+  &.activeReason {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+    color: #991b1b;
+    font-weight: 600;
+  }
+}
+
+.modalBtnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+
+  @media screen and (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.confirmCancelBtn {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border: none;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  height: 42px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #dc2626 !important;
+  }
+}
+
+.keepRideBtn {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #e2e8f0 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  height: 42px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+}

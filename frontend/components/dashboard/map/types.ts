@@ -28,7 +28,11 @@ export interface MapProps {
     showSearchOverlay?: boolean;
     showControls?: boolean;
     nearbyCabs?: NearbyCab[];
+    pickupCoords?: Coordinates;
+    dropoffCoords?: Coordinates | null;
+    onMapClickCoords?: (coords: Coordinates) => void;
     onPickupChange?: (coords: Coordinates) => void;
     onDropoffChange?: (coords: Coordinates | null) => void;
     onRouteChange?: (route: RouteInfo | null) => void;
+    drawRouteDirectly?: [number, number][] | null;
 }

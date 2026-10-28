@@ -1,12 +1,18 @@
-import UserDashboard from '@/components/dashboard/user-dashboard'
-import React from 'react'
+import UserDashboard from "@/components/dashboard/user-dashboard";
+import React from "react";
 
 const page = () => {
   return (
-    <div style={{ width: '100%', height: '100vh', overflow: 'hidden' }}>
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        backgroundColor: "#f8fafc",
+      }}
+    >
       <UserDashboard />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

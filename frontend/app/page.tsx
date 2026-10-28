@@ -1,12 +1,8 @@
 "use client";
 
-import Login from '@/components/login/Login'
-import React from 'react'
+import React from "react";
+import SplashScreen from "@/components/splash/SplashScreen";
 
-const page = () => {
-  return (
-    <div><Login/></div>
-  )
+export default function HomePage() {
+  return <SplashScreen />;
 }
-
-export default page

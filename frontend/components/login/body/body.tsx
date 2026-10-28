@@ -16,10 +16,12 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTaxii } from "@/context/TaxiiContext";
 
 import styles from "./body.module.scss";
 import {
@@ -67,20 +69,35 @@ const HeaderBody = ({ role, setRole, page, setPage }: Props) => {
         resolver: zodResolver(captainLoginSchema),
     });
 
+    const router = useRouter();
+    const { setIsLoggedIn, setAppMode } = useTaxii();
+
     const onUserRegisterSubmit = (data: RegisterFormData) => {
         console.log("Passenger Register:", data);
+        setIsLoggedIn(true);
+        setAppMode("rider");
+        router.push("/dashboard");
     };
 
     const onUserLoginSubmit = (data: LoginFormData) => {
         console.log("Passenger Login:", data);
+        setIsLoggedIn(true);
+        setAppMode("rider");
+        router.push("/dashboard");
     };
 
     const onCaptainRegisterSubmit = (data: CaptainRegisterFormData) => {
         console.log("Captain Register:", data);
+        setIsLoggedIn(true);
+        setAppMode("driver");
+        router.push("/dashboard");
     };
 
     const onCaptainLoginSubmit = (data: CaptainLoginFormData) => {
         console.log("Captain Login:", data);
+        setIsLoggedIn(true);
+        setAppMode("driver");
+        router.push("/dashboard");
     };
 
     // Hero banner text configurations

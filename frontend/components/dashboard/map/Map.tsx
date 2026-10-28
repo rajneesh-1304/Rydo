@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Box } from "@mui/material";
 
 // Import Leaflet styles directly into the bundle
@@ -16,30 +16,26 @@ import { MapLoading } from "./components/MapLoading/MapLoading";
 
 import styles from "./Map.module.scss";
 
-const DEFAULT_CENTER: Coordinates = { lat: 28.6139, lng: 77.209 };
-
-const DEFAULT_NEARBY_CABS = [
-    { id: 1, lat: 28.618, lng: 77.214, type: "Sedan", eta: "2 min" },
-    { id: 2, lat: 28.611, lng: 77.204, type: "Taxi", eta: "4 min" },
-    { id: 3, lat: 28.622, lng: 77.203, type: "EV", eta: "3 min" },
-    { id: 4, lat: 28.608, lng: 77.219, type: "Auto", eta: "5 min" },
-];
+const DEFAULT_CENTER: Coordinates = { lat: 30.7333, lng: 76.7794 };
 
 export const MapComponent: React.FC<MapProps> = ({
     initialCenter = DEFAULT_CENTER,
     zoom = 14,
-    height = "100%",
-    showSearchOverlay = true,
+    showSearchOverlay = false,
     showControls = true,
-    nearbyCabs = DEFAULT_NEARBY_CABS,
+    nearbyCabs = [],
+    pickupCoords: externalPickup,
+    dropoffCoords: externalDropoff,
+    onMapClickCoords,
     onPickupChange,
     onDropoffChange,
     onRouteChange,
+    drawRouteDirectly,
 }) => {
-    const [pickupCoords, setPickupCoords] = useState<Coordinates>(initialCenter);
-    const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(null);
-    const [pickupAddress, setPickupAddress] = useState("Current Location");
-    const [resolvedPickupAddress, setResolvedPickupAddress] = useState("Current Location");
+    const [pickupCoords, setPickupCoords] = useState<Coordinates>(externalPickup || initialCenter);
+    const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(externalDropoff || null);
+    const [pickupAddress, setPickupAddress] = useState("Sector 22, Chandigarh");
+    const [resolvedPickupAddress, setResolvedPickupAddress] = useState("Sector 22, Chandigarh");
     const [dropoffAddress, setDropoffAddress] = useState("");
     const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
 
@@ -71,15 +67,18 @@ export const MapComponent: React.FC<MapProps> = ({
         initialCenter,
         zoom,
         nearbyCabs,
-        // When user clicks the map to place dropoff pin:
+        // When user clicks the map:
         onMapClick: async (coords) => {
-            setDropoffCoords(coords);
-            setDropoffMarker(coords);
-            onDropoffChange?.(coords);
+            if (onMapClickCoords) {
+                onMapClickCoords(coords);
+            } else {
+                setDropoffCoords(coords);
+                setDropoffMarker(coords);
+                onDropoffChange?.(coords);
 
-            // Immediately reverse geocode and set in the dropoff textfield!
-            const address = await reverseGeocodeLocation(coords);
-            setDropoffAddress(address || `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+                const address = await reverseGeocodeLocation(coords);
+                setDropoffAddress(address || `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+            }
         },
         // When user drags pickup marker:
         onPickupDragEnd: async (coords) => {
@@ -101,6 +100,38 @@ export const MapComponent: React.FC<MapProps> = ({
         },
     });
 
+    // Sync external pickup coordinates
+    useEffect(() => {
+        if (externalPickup) {
+            setPickupCoords(externalPickup);
+            setPickupMarker(externalPickup);
+        }
+    }, [externalPickup, setPickupMarker]);
+
+    // Sync external dropoff coordinates
+    useEffect(() => {
+        if (externalDropoff) {
+            setDropoffCoords(externalDropoff);
+            setDropoffMarker(externalDropoff);
+        }
+    }, [externalDropoff, setDropoffMarker]);
+
+    // Calculate route when both coordinates are available
+    useEffect(() => {
+        const p = externalPickup || pickupCoords;
+        const d = externalDropoff !== undefined ? externalDropoff : dropoffCoords;
+        if (p && d) {
+            calculateRoute(p, d);
+        }
+    }, [externalPickup, externalDropoff, calculateRoute]);
+
+    // Draw route directly if provided
+    useEffect(() => {
+        if (drawRouteDirectly && drawRouteDirectly.length > 0) {
+            drawRoutePolyline(drawRouteDirectly);
+        }
+    }, [drawRouteDirectly, drawRoutePolyline]);
+
     const handleClearRoute = () => {
         clearRouteFromMap();
         setDropoffCoords(null);
@@ -114,7 +145,6 @@ export const MapComponent: React.FC<MapProps> = ({
     const handleFindCabs = async (pickupQuery: string, dropoffQuery: string) => {
         let pCoords = pickupCoords;
 
-        // ONLY geocode pickup if user manually typed a new location that is NOT already matched to the pin/GPS
         const isPickupAlreadySet =
             pickupQuery === "Current Location" ||
             pickupQuery === resolvedPickupAddress ||
@@ -131,7 +161,6 @@ export const MapComponent: React.FC<MapProps> = ({
             }
         }
 
-        // Dropoff resolution
         let dCoords = dropoffCoords;
         if (!dCoords || dropoffQuery !== dropoffAddress) {
             const targetDropoff = await searchLocation(dropoffQuery);

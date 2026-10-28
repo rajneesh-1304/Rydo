@@ -25,6 +25,7 @@ export const useLeafletMap = ({
     const pickupMarkerRef = useRef<any>(null);
     const dropoffMarkerRef = useRef<any>(null);
     const routePolylineRef = useRef<any>(null);
+    const cabsLayerRef = useRef<any>(null);
 
     // Keep handler refs up to date to prevent stale closures
     const onMapClickRef = useRef(onMapClick);
@@ -81,7 +82,10 @@ export const useLeafletMap = ({
                     onPickupDragEndRef.current?.({ lat: pos.lat, lng: pos.lng });
                 });
 
-                // 4. Add Nearby Cabs
+                // 4. Layer group for nearby cabs
+                const cabsLayer = L.layerGroup().addTo(map);
+                cabsLayerRef.current = cabsLayer;
+
                 const carIcon = createCarIcon(L);
                 nearbyCabs.forEach((cab) => {
                     L.marker([cab.lat, cab.lng], { icon: carIcon })
@@ -89,15 +93,15 @@ export const useLeafletMap = ({
                             direction: "top",
                             offset: [0, -10],
                         })
-                        .addTo(map);
+                        .addTo(cabsLayer);
                 });
 
-                // 5. Map Click Listener for setting destination
+                // 5. Map Click Listener
                 map.on("click", (e: any) => {
                     onMapClickRef.current?.({ lat: e.latlng.lat, lng: e.latlng.lng });
                 });
 
-                // Crucial: Invalidate size after mount to prevent 0x0 rendering
+                // Invalidate size after mount
                 resizeTimer = setTimeout(() => {
                     if (mapRef.current) {
                         mapRef.current.invalidateSize();
@@ -122,6 +126,27 @@ export const useLeafletMap = ({
             }
         };
     }, []);
+
+    // Update nearby cabs on layer whenever nearbyCabs prop changes
+    useEffect(() => {
+        const updateCabs = async () => {
+            if (!mapRef.current || !cabsLayerRef.current) return;
+            const L = await loadLeaflet();
+            cabsLayerRef.current.clearLayers();
+
+            const carIcon = createCarIcon(L);
+            nearbyCabs.forEach((cab) => {
+                L.marker([cab.lat, cab.lng], { icon: carIcon })
+                    .bindTooltip(`${cab.type} • ${cab.eta}`, {
+                        direction: "top",
+                        offset: [0, -10],
+                    })
+                    .addTo(cabsLayerRef.current);
+            });
+        };
+
+        updateCabs();
+    }, [nearbyCabs]);
 
     // Set or move Dropoff Marker
     const setDropoffMarker = useCallback(async (coords: Coordinates) => {
@@ -170,7 +195,7 @@ export const useLeafletMap = ({
         }).addTo(mapRef.current);
 
         routePolylineRef.current = polyline;
-        mapRef.current.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+        mapRef.current.fitBounds(polyline.getBounds(), { padding: [50, 50] });
     }, []);
 
     // Clear route polyline and dropoff marker

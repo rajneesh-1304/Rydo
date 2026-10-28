@@ -13,17 +13,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { TaxiiProvider } from "@/context/TaxiiContext";
+
 export const metadata: Metadata = {
-  title: "Rydo",
-  description: "Taxi-Booking-App",
+  title: "Taxii - Ride Safe. Ride Easy.",
+  description: "Taxii Booking & Driver Platform",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning>
         <AppRouterCacheProvider>
-          {children}
+          <TaxiiProvider>
+            {children}
+          </TaxiiProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
