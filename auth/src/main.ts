@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import cookieParser from 'cookie-parser';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   initializeTransactionalContext();
@@ -15,6 +16,8 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.useWebSocketAdapter(new IoAdapter(app));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,8 +26,8 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port);
+  const port = process.env.PORT ?? 5001;
+  await app.listen(port, '0.0.0.0');
   console.log(`Application is running on port: ${port}`);
 }
 void bootstrap();

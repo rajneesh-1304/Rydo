@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Box, Typography, Button, Skeleton } from "@mui/material";
+import React, { useState, useRef } from "react";
+import { Box, Typography, Button, Skeleton, CircularProgress } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userOnboardingSchema, UserOnboardingFormData } from "../body/body.schema";
+import { uploadImage } from "@/services/uploadService";
 import styles from "./modals.module.scss";
 
 type UserModalProps = {
@@ -32,10 +34,15 @@ export const UserModal: React.FC<UserModalProps> = ({
   isLoading = false,
 }) => {
   const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(googleMockUser.avatar);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<UserOnboardingFormData>({
     resolver: zodResolver(userOnboardingSchema),
@@ -48,6 +55,30 @@ export const UserModal: React.FC<UserModalProps> = ({
       image: googleMockUser.avatar,
     },
   });
+
+  const handleCustomPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      setUploadStatus("Uploading to Cloudinary...");
+      const res = await uploadImage(file);
+      if (res.url) {
+        setCurrentAvatar(res.url);
+        setValue("image", res.url);
+        setUploadStatus(
+          res.provider === "cloudinary"
+            ? "Uploaded to Cloudinary ☁️"
+            : "Photo loaded successfully"
+        );
+      }
+    } catch (err: any) {
+      setUploadStatus("Upload failed: " + (err.message || "error"));
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -81,7 +112,7 @@ export const UserModal: React.FC<UserModalProps> = ({
 
         <Box className={styles.avatarSection}>
           <Box className={styles.avatarWrapper}>
-            {(!avatarLoaded || isLoading) && (
+            {(!avatarLoaded || isLoading || isUploading) && (
               <Skeleton
                 variant="circular"
                 width={60}
@@ -90,19 +121,53 @@ export const UserModal: React.FC<UserModalProps> = ({
               />
             )}
             <Image
-              src={googleMockUser.avatar}
+              src={currentAvatar}
               alt="Profile Avatar"
               width={60}
               height={60}
               className={styles.avatarCircle}
               onLoad={() => setAvatarLoaded(true)}
+              unoptimized
             />
           </Box>
           <Box className={styles.avatarText}>
             <Typography className={styles.avatarTitle}>Profile Picture</Typography>
             <Typography className={styles.avatarHint}>
-              Imported from your Google account
+              {uploadStatus || "Imported from your Google account"}
             </Typography>
+            <Box sx={{ mt: 0.5 }}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleCustomPhotoUpload}
+              />
+              <Button
+                type="button"
+                size="small"
+                variant="outlined"
+                startIcon={isUploading ? <CircularProgress size={14} color="inherit" /> : <CloudUploadIcon fontSize="small" />}
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+                sx={{
+                  fontSize: "11px",
+                  textTransform: "none",
+                  py: 0.2,
+                  px: 1.2,
+                  borderRadius: "14px",
+                  borderColor: "#3b82f6",
+                  color: "#2563eb",
+                  fontWeight: 600,
+                  "&:hover": {
+                    backgroundColor: "#eff6ff",
+                    borderColor: "#1d4ed8",
+                  },
+                }}
+              >
+                {isUploading ? "Uploading..." : "Upload via Cloudinary"}
+              </Button>
+            </Box>
           </Box>
         </Box>
 

@@ -34,5 +34,9 @@ export class UpdateVehicleDto {
 
   @IsOptional()
   @IsString()
+  cab_type?: string;
+
+  @IsOptional()
+  @IsString()
   car_image?: string;
 }

@@ -745,59 +745,204 @@
 
 .chatModalCard {
   background: #ffffff;
-  padding: 24px;
-  border-radius: 18px;
+  padding: 20px;
+  border-radius: 20px;
   width: 100%;
-  max-width: 380px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 440px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .chatTitle {
-  margin: 0 0 10px 0;
+  margin: 0;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
 }
 
-.chatMsgBubble {
-  background-color: #f8fafc;
-  padding: 10px 12px;
-  border-radius: 8px;
+.chatSubtitle {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.chatMessagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
   margin-bottom: 12px;
+}
+
+.chatMessageRow {
+  display: flex;
+  width: 100%;
+}
+
+.chatRowRight {
+  justify-content: flex-end;
+}
+
+.chatRowLeft {
+  justify-content: flex-start;
+}
+
+.chatBubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
   font-size: 13px;
-  color: #334155;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bubbleDriver {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+
+.bubbleRider {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border-bottom-left-radius: 2px;
+}
+
+.chatSenderLabel {
+  font-size: 10px;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+.chatText {
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.quickChipsRow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.quickChipBtn {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #475569;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+  }
+}
+
+.chatInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .chatInput {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 14px;
-  font-size: 14px;
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 13px;
   outline: none;
   box-sizing: border-box;
 
   &:focus {
-    border-color: #000000;
+    border-color: #059669;
   }
 }
 
-.btnPrimary {
-  width: 100%;
-  height: 44px;
-  background-color: #000000;
+.sendMsgBtn {
+  background: #059669;
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  border-radius: 10px;
+  min-width: 44px;
+  width: 44px;
+  height: 42px;
+  border-radius: 12px;
+  padding: 0;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    background-color: #27272a;
+    background: #047857;
+  }
+
+  &:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+}
+
+.liveGpsPulseBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.pulseDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #059669;
+  animation: pulseAnim 1.8s infinite;
+}
+
+@keyframes pulseAnim {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(5, 150, 105, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
   }
 }
 

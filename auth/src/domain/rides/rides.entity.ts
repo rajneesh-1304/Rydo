@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -22,18 +23,24 @@ export class Rides {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'uuid', unique: true })
-  @Generated('uuid')
+  @Column({ type: 'varchar', length: 64, unique: true })
   uuid: string;
 
-  @Column({ type: 'uuid' })
+  @BeforeInsert()
+  generateUuid() {
+    if (!this.uuid) {
+      this.uuid = `BK-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+  }
+
+  @Column({ type: 'varchar', length: 36 })
   rider_id: string;
 
   @ManyToOne(() => Users, (user) => user.rides)
   @JoinColumn({ name: 'rider_id', referencedColumnName: 'uuid' })
   rider: Users;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', length: 36, nullable: true })
   driver_id: string | null;
 
   @ManyToOne(() => Driver, (driver) => driver.rider, { nullable: true })
@@ -64,24 +71,27 @@ export class Rides {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   fare: string;
 
+  @Column({ type: 'varchar', length: 6, nullable: true })
+  otp: string | null;
+
   @Column({
-    type: 'enum',
-    enum: RideStatus,
+    type: 'varchar',
+    length: 32,
     default: RideStatus.REQUESTED,
   })
   status: RideStatus;
 
-  @Column({ type: 'timestamp', nullable: true })
-  accepted_at: Date | null;
+  @Column({ type: 'varchar', nullable: true })
+  accepted_at: Date | string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
-  started_at: Date | null;
+  @Column({ type: 'varchar', nullable: true })
+  started_at: Date | string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
-  completed_at: Date | null;
+  @Column({ type: 'varchar', nullable: true })
+  completed_at: Date | string | null;
 
-  @Column({ type: 'timestamp', nullable: true })
-  cancelled_at: Date | null;
+  @Column({ type: 'varchar', nullable: true })
+  cancelled_at: Date | string | null;
 
   @CreateDateColumn()
   created_at: Date;

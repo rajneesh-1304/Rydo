@@ -35,4 +35,5 @@ export interface MapProps {
     onDropoffChange?: (coords: Coordinates | null) => void;
     onRouteChange?: (route: RouteInfo | null) => void;
     drawRouteDirectly?: [number, number][] | null;
+    liveDriverCoords?: Coordinates | null;
 }

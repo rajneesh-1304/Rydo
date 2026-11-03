@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -15,12 +16,21 @@ export class Vehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Generated('uuid')
-  @Column({ type: 'uuid', unique: true })
+  @Column({ type: 'varchar', length: 64, unique: true })
   uuid: string;
+
+  @BeforeInsert()
+  generateUuid() {
+    if (!this.uuid) {
+      this.uuid = `v-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 8)}`;
+    }
+  }
 
   @Column()
   model: string;
+
+  @Column({ default: 'Sedan' })
+  cab_type: string;
 
   @Column({ unique: true })
   plate_number: string;

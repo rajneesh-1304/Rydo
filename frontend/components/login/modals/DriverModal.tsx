@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { Box, Typography, Button, Skeleton } from "@mui/material";
+import React, { useState, useRef } from "react";
+import { Box, Typography, Button, Skeleton, CircularProgress } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +15,7 @@ import {
   DriverPersonalFormData,
   DriverVehicleFormData,
 } from "../body/body.schema";
+import { uploadImage } from "@/services/uploadService";
 import styles from "./modals.module.scss";
 
 type DriverModalProps = {
@@ -43,16 +45,24 @@ export const DriverModal: React.FC<DriverModalProps> = ({
   isLoading = false,
 }) => {
   const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(googleMockUser.avatar || "/amit-driver.jpg");
+  const [currentCarImage, setCurrentCarImage] = useState("/car.png");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingCarImage, setIsUploadingCarImage] = useState(false);
+  const [avatarUploadStatus, setAvatarUploadStatus] = useState<string | null>(null);
+  const [carUploadStatus, setCarUploadStatus] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const carInputRef = useRef<HTMLInputElement>(null);
 
   const personalForm = useForm<DriverPersonalFormData>({
     resolver: zodResolver(driverPersonalSchema),
     defaultValues: {
-      first_name: "Amit",
-      last_name: "Kumar",
+      first_name: googleMockUser.first_name || "Amit",
+      last_name: googleMockUser.last_name || "Kumar",
       gender: "Male",
       phone: "+91 98123 45678",
       dob: "1992-08-20",
-      image: "/amit-driver.jpg",
+      image: googleMockUser.avatar || "/amit-driver.jpg",
     },
   });
 
@@ -69,6 +79,52 @@ export const DriverModal: React.FC<DriverModalProps> = ({
       car_image: "/car.png",
     },
   });
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingAvatar(true);
+      setAvatarUploadStatus("Uploading to Cloudinary...");
+      const res = await uploadImage(file);
+      if (res.url) {
+        setCurrentAvatar(res.url);
+        personalForm.setValue("image", res.url);
+        setAvatarUploadStatus(
+          res.provider === "cloudinary"
+            ? "Uploaded to Cloudinary ☁️"
+            : "Photo loaded successfully"
+        );
+      }
+    } catch (err: any) {
+      setAvatarUploadStatus("Upload failed: " + (err.message || "error"));
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleCarImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingCarImage(true);
+      setCarUploadStatus("Uploading to Cloudinary...");
+      const res = await uploadImage(file);
+      if (res.url) {
+        setCurrentCarImage(res.url);
+        vehicleForm.setValue("car_image", res.url);
+        setCarUploadStatus(
+          res.provider === "cloudinary"
+            ? "Vehicle uploaded to Cloudinary ☁️"
+            : "Vehicle image loaded"
+        );
+      }
+    } catch (err: any) {
+      setCarUploadStatus("Upload failed: " + (err.message || "error"));
+    } finally {
+      setIsUploadingCarImage(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -104,7 +160,7 @@ export const DriverModal: React.FC<DriverModalProps> = ({
 
             <Box className={styles.avatarSection}>
               <Box className={styles.avatarWrapper}>
-                {(!avatarLoaded || isLoading) && (
+                {(!avatarLoaded || isLoading || isUploadingAvatar) && (
                   <Skeleton
                     variant="circular"
                     width={60}
@@ -113,19 +169,59 @@ export const DriverModal: React.FC<DriverModalProps> = ({
                   />
                 )}
                 <Image
-                  src="/amit-driver.jpg"
+                  src={currentAvatar}
                   alt="Driver Avatar"
                   width={60}
                   height={60}
                   className={styles.avatarCircle}
                   onLoad={() => setAvatarLoaded(true)}
+                  unoptimized
                 />
               </Box>
               <Box className={styles.avatarText}>
                 <Typography className={styles.avatarTitle}>Captain Profile Photo</Typography>
                 <Typography className={styles.avatarHint}>
-                  Visible to passengers when you accept trips
+                  {avatarUploadStatus || "Visible to passengers when you accept trips"}
                 </Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleAvatarUpload}
+                  />
+                  <Button
+                    type="button"
+                    size="small"
+                    variant="outlined"
+                    startIcon={
+                      isUploadingAvatar ? (
+                        <CircularProgress size={14} color="inherit" />
+                      ) : (
+                        <CloudUploadIcon fontSize="small" />
+                      )
+                    }
+                    disabled={isUploadingAvatar}
+                    onClick={() => avatarInputRef.current?.click()}
+                    sx={{
+                      fontSize: "11px",
+                      textTransform: "none",
+                      py: 0.2,
+                      px: 1.2,
+                      borderRadius: "14px",
+                      borderColor: "#3b82f6",
+                      color: "#2563eb",
+                      fontWeight: 600,
+                      "&:hover": {
+                        backgroundColor: "#eff6ff",
+                        borderColor: "#1d4ed8",
+                      },
+                    }}
+                  >
+                    {isUploadingAvatar ? "Uploading..." : "Upload via Cloudinary"}
+                  </Button>
+                </Box>
               </Box>
             </Box>
 
@@ -421,50 +517,102 @@ export const DriverModal: React.FC<DriverModalProps> = ({
 
               <Box className={styles.field}>
                 <Typography component="label" className={styles.label}>
-                  Vehicle Type Preset
+                  Vehicle Category & Model Preset
                 </Typography>
                 <Box className={styles.carImagePreviewRow}>
                   <Button
                     type="button"
-                    className={`${styles.carOptionBtn} ${styles.carOptionBtnActive}`}
+                    className={`${styles.carOptionBtn} ${vehicleForm.watch("model")?.includes("Dzire") ? styles.carOptionBtnActive : ""}`}
                     onClick={() => {
                       vehicleForm.setValue("model", "Maruti Swift Dzire");
-                      vehicleForm.setValue("car_image", "/car.png");
+                      vehicleForm.setValue("color", "White");
                     }}
                   >
-                    🚗 Sedan / Dzire
+                    🚗 Sedan
                   </Button>
                   <Button
                     type="button"
-                    className={styles.carOptionBtn}
+                    className={`${styles.carOptionBtn} ${vehicleForm.watch("model")?.includes("i10") ? styles.carOptionBtnActive : ""}`}
                     onClick={() => {
                       vehicleForm.setValue("model", "Hyundai Grand i10");
-                      vehicleForm.setValue("car_image", "/car.png");
+                      vehicleForm.setValue("color", "Silver");
                     }}
                   >
-                    🚙 Mini / Hatchback
+                    🚙 Mini
                   </Button>
                   <Button
                     type="button"
-                    className={styles.carOptionBtn}
+                    className={`${styles.carOptionBtn} ${vehicleForm.watch("model")?.includes("Auto") ? styles.carOptionBtnActive : ""}`}
                     onClick={() => {
                       vehicleForm.setValue("model", "Bajaj RE Auto");
-                      vehicleForm.setValue("car_image", "/car.png");
+                      vehicleForm.setValue("color", "Yellow-Green");
                     }}
                   >
-                    🛺 Auto Rickshaw
+                    🛺 Auto
+                  </Button>
+                  <Button
+                    type="button"
+                    className={`${styles.carOptionBtn} ${vehicleForm.watch("model")?.includes("Activa") ? styles.carOptionBtnActive : ""}`}
+                    onClick={() => {
+                      vehicleForm.setValue("model", "Honda Activa 6G");
+                      vehicleForm.setValue("color", "Matte Black");
+                    }}
+                  >
+                    🛵 Bike
                   </Button>
                 </Box>
               </Box>
 
               <Box className={styles.field}>
                 <Typography component="label" className={styles.label}>
-                  Vehicle Image URL (optional)
+                  Vehicle Photo (Cloudinary)
                 </Typography>
+                <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", mt: 0.5 }}>
+                  <input
+                    ref={carInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleCarImageUpload}
+                  />
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    size="small"
+                    startIcon={
+                      isUploadingCarImage ? (
+                        <CircularProgress size={14} color="inherit" />
+                      ) : (
+                        <CloudUploadIcon fontSize="small" />
+                      )
+                    }
+                    disabled={isUploadingCarImage}
+                    onClick={() => carInputRef.current?.click()}
+                    sx={{
+                      fontSize: "12px",
+                      textTransform: "none",
+                      borderRadius: "14px",
+                      borderColor: "#3b82f6",
+                      color: "#2563eb",
+                      fontWeight: 600,
+                      py: 0.5,
+                      px: 1.5,
+                      "&:hover": { backgroundColor: "#eff6ff" },
+                    }}
+                  >
+                    {isUploadingCarImage ? "Uploading..." : "Upload Car Photo"}
+                  </Button>
+                  {carUploadStatus && (
+                    <Typography variant="caption" sx={{ color: "#059669", fontWeight: 500 }}>
+                      {carUploadStatus}
+                    </Typography>
+                  )}
+                </Box>
                 <input
                   type="text"
                   className={styles.inputField}
-                  placeholder="/car.png or image URL"
+                  placeholder="/car.png or Cloudinary image URL"
+                  style={{ marginTop: "8px" }}
                   {...vehicleForm.register("car_image")}
                 />
               </Box>

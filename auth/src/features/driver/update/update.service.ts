@@ -55,6 +55,10 @@ export class DriverUpdateHandler {
       driver.status = status;
     }
 
+    if (data.is_online !== undefined) {
+      driver.is_online = data.is_online;
+    }
+
     if (vehicleDto) {
       if (driver.vehicle) {
         Object.assign(driver.vehicle, vehicleDto);

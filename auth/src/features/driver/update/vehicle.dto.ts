@@ -32,5 +32,9 @@ export class VehicleDto {
 
   @IsOptional()
   @IsString()
+  cab_type?: string;
+
+  @IsOptional()
+  @IsString()
   car_image?: string;
 }

@@ -25,7 +25,7 @@ export const TopNav: React.FC = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setAnchorEl(null);
-    router.push("/");
+    router.push("/login");
   };
 
   return (
@@ -35,7 +35,7 @@ export const TopNav: React.FC = () => {
           Taxii
         </Typography>
         <span className={styles.roleBadge}>
-          {isCaptain ? "Driver" : "Rider"}
+          {isCaptain ? "Captain (Driver)" : "Rider (Passenger)"}
         </span>
       </Box>
 

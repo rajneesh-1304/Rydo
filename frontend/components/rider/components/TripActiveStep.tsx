@@ -32,6 +32,10 @@ export const TripActiveStep: React.FC = () => {
           <Typography className={styles.tripActiveSubtitle}>
             Captain {driverInfo.name} is driving. Estimated arrival in 9 mins.
           </Typography>
+          <Box className={styles.liveGpsPulseBadge} sx={{ mt: 1.5, background: "rgba(16, 185, 129, 0.15)", color: "#065f46" }}>
+            <Box className={styles.pulseDot} sx={{ backgroundColor: "#10b981" }} />
+            <span>Live Location Streaming • 5s Interval Active</span>
+          </Box>
         </Box>
 
         <Box className={styles.driverCard}>

@@ -63,6 +63,10 @@ export class UpdateDriverDto {
   is_verified?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  is_online?: boolean;
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => UpdateVehicleDto)
   vehicle?: UpdateVehicleDto;

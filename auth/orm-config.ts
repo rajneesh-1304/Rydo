@@ -15,8 +15,8 @@ export const dataSourceOptions = (
   configService: ConfigService
 ): DataSourceOptions => ({
   type: 'postgres',
-  host: configService.get<string>('DB_HOST') || process.env.DB_HOST || 'localhost',
-  port: Number(configService.get<number>('DB_PORT') || process.env.DB_PORT || 5432),
+  host: configService.get<string>('DB_HOST') || process.env.DB_HOST || '/tmp',
+  port: Number(configService.get<number>('DB_PORT') || process.env.DB_PORT || 5433),
   username: configService.get<string>('DB_USERNAME') || process.env.DB_USERNAME || 'postgres',
   password: configService.get<string>('DB_PASSWORD') || process.env.DB_PASSWORD || 'postgres',
   database: configService.get<string>('DB_NAME') || process.env.DB_NAME || 'taxii_auth',

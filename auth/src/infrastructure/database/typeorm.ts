@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { dataSource, dataSourceOptions } from '../../../orm-config';
+import { DataSeedService } from './seeds/initial-data.seed';
 
 @Module({
   imports: [
@@ -13,5 +14,7 @@ import { dataSource, dataSourceOptions } from '../../../orm-config';
       dataSourceFactory: () => Promise.resolve(dataSource()),
     }),
   ],
+  providers: [DataSeedService],
+  exports: [DataSeedService],
 })
 export class TypeORMModule {}

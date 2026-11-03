@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Box, Typography, Switch } from "@mui/material";
+import React, { useState, useRef, useEffect } from "react";
+import { Box, Typography, Switch, IconButton } from "@mui/material";
 import PhoneIcon from "@mui/icons-material/Phone";
 import ChatIcon from "@mui/icons-material/Chat";
 import NavigationIcon from "@mui/icons-material/Navigation";
@@ -11,8 +11,13 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import KeyIcon from "@mui/icons-material/Key";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import CloseIcon from "@mui/icons-material/Close";
+import SendIcon from "@mui/icons-material/Send";
 import MapComponent from "../dashboard/map/Map";
 import { useTaxii } from "@/context/TaxiiContext";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addMessage } from "@/store/slices/chatSlice";
+import { socketService } from "@/services/socketService";
 import styles from "./DriverExperience.module.scss";
 
 export const DriverExperience: React.FC = () => {
@@ -33,12 +38,56 @@ export const DriverExperience: React.FC = () => {
     finishDriverTrip,
     otpError,
     setOtpError,
+    driverLiveLocation,
+    fiveSecTickCount,
   } = useTaxii();
+
+  const dispatch = useAppDispatch();
+  const chatMessages = useAppSelector((state) => state.chat.messages);
+  const rideId = useAppSelector((state) => state.ride.rideId);
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "earnings">("dashboard");
   const [showDriverChat, setShowDriverChat] = useState(false);
   const [showDriverCancelModal, setShowDriverCancelModal] = useState(false);
   const [otpInput, setOtpInput] = useState("");
+  const [driverChatText, setDriverChatText] = useState("");
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, showDriverChat]);
+
+  const handleSendDriverMessage = (customText?: string) => {
+    const text = (customText || driverChatText).trim();
+    if (!text) return;
+
+    const timeStr = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const msg = {
+      id: `msg-${Date.now()}`,
+      rideId,
+      sender: driverProfile.name,
+      senderRole: "driver" as const,
+      text,
+      time: timeStr,
+    };
+
+    dispatch(addMessage(msg));
+    socketService.sendMessage({
+      rideId: rideId || incomingRideDetails.rideId || "BK-9021",
+      senderId: "d-amit-124",
+      senderName: driverProfile.name,
+      senderRole: "driver",
+      text,
+    });
+
+    setDriverChatText("");
+  };
 
   const handleVerifyAndStartTrip = () => {
     if (!otpInput || otpInput.trim().length !== 4) {
@@ -56,8 +105,11 @@ export const DriverExperience: React.FC = () => {
     setDriverTripState("idle");
   };
 
-  // Coordinates for Chandigarh driver
-  const driverLocation = { lat: 30.7333, lng: 76.7794 };
+  // Coordinates for Chandigarh driver updated in real-time
+  const driverLocation =
+    driverTripState !== "idle" && driverLiveLocation
+      ? { lat: driverLiveLocation.lat, lng: driverLiveLocation.lng }
+      : { lat: 30.7333, lng: 76.7794 };
   const targetLocation =
     driverTripState === "in_progress"
       ? incomingRideDetails.dropoffCoords
@@ -160,6 +212,11 @@ export const DriverExperience: React.FC = () => {
                       </span>
                     </div>
 
+                    <div className={styles.liveGpsPulseBadge}>
+                      <div className={styles.pulseDot} />
+                      <span>Live GPS Radar • 5s Interval Active ({driverLiveLocation.speed} km/h)</span>
+                    </div>
+
                     <div className={styles.passengerCard}>
                       <div>
                         <div className={styles.passengerName}>
@@ -249,6 +306,11 @@ export const DriverExperience: React.FC = () => {
                       <span className={styles.stateFareGreen}>
                         ₹{incomingRideDetails.fare}
                       </span>
+                    </div>
+
+                    <div className={styles.liveGpsPulseBadge}>
+                      <div className={styles.pulseDot} />
+                      <span>Live GPS Navigation • 5s Interval Active ({driverLiveLocation.speed} km/h)</span>
                     </div>
 
                     <div className={styles.destinationBox}>
@@ -453,24 +515,83 @@ export const DriverExperience: React.FC = () => {
             className={styles.chatModalCard}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className={styles.chatTitle}>
-              Chat with {incomingRideDetails.passengerName}
-            </h3>
-            <div className={styles.chatMsgBubble}>
-              <strong>Passenger:</strong> Hi Captain, I am waiting right outside the main gate with OTP ready!
+            <div className={styles.chatHeader}>
+              <div>
+                <h3 className={styles.chatTitle}>
+                  Chat with {incomingRideDetails.passengerName}
+                </h3>
+                <div className={styles.chatSubtitle}>
+                  Live in-ride messaging • Real-time
+                </div>
+              </div>
+              <IconButton size="small" onClick={() => setShowDriverChat(false)} sx={{ color: "#64748b" }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
             </div>
-            <input
-              type="text"
-              placeholder="Reply to passenger..."
-              className={styles.chatInput}
-            />
-            <button
-              type="button"
-              className={styles.btnPrimary}
-              onClick={() => setShowDriverChat(false)}
-            >
-              Send Reply
-            </button>
+
+            <div className={styles.chatMessagesContainer} ref={chatScrollRef}>
+              {chatMessages.map((m) => {
+                const isDriver = m.senderRole === "driver";
+                return (
+                  <div
+                    key={m.id}
+                    className={`${styles.chatMessageRow} ${
+                      isDriver ? styles.chatRowRight : styles.chatRowLeft
+                    }`}
+                  >
+                    <div
+                      className={`${styles.chatBubble} ${
+                        isDriver ? styles.bubbleDriver : styles.bubbleRider
+                      }`}
+                    >
+                      <div className={styles.chatSenderLabel}>
+                        {isDriver ? "You (Driver)" : incomingRideDetails.passengerName} • {m.time}
+                      </div>
+                      <div className={styles.chatText}>{m.text}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className={styles.quickChipsRow}>
+              {[
+                "I have reached pickup",
+                "Traffic ahead, on my way",
+                "Please wait 2 mins",
+                "Okay, thank you!",
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={styles.quickChipBtn}
+                  onClick={() => handleSendDriverMessage(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.chatInputRow}>
+              <input
+                type="text"
+                placeholder="Reply to passenger..."
+                className={styles.chatInput}
+                value={driverChatText}
+                onChange={(e) => setDriverChatText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSendDriverMessage();
+                }}
+              />
+              <button
+                type="button"
+                className={styles.sendMsgBtn}
+                onClick={() => handleSendDriverMessage()}
+                disabled={!driverChatText.trim()}
+              >
+                <SendIcon fontSize="small" />
+              </button>
+            </div>
           </div>
         </div>
       )}

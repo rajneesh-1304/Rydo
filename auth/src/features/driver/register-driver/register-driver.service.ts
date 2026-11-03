@@ -45,15 +45,25 @@ export class DriverSaveHandler {
 
     if (!driver) {
       driver = this.driverRepository.create({
+        uuid: `d-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
         user,
         status: driverData.status || Status.ACTIVE,
+        is_online: true,
+        rating: 4.85,
+        total_rides: 120,
+        current_latitude: '30.7333',
+        current_longitude: '76.7794',
       });
       driver = await this.driverRepository.save(driver);
+    } else {
+      driver.is_online = true;
+      await this.driverRepository.save(driver);
     }
 
     if (vehicleDto) {
+      const cabType = (vehicleDto as any).cab_type || 'Sedan';
       if (driver.vehicle) {
-        Object.assign(driver.vehicle, vehicleDto);
+        Object.assign(driver.vehicle, { ...vehicleDto, cab_type: cabType });
         await this.vehicleRepository.saveVehicleDetails(driver.vehicle);
       } else {
         if (vehicleDto.plate_number) {
@@ -68,7 +78,9 @@ export class DriverSaveHandler {
         }
 
         const newVehicle = this.vehicleRepository.create({
+          uuid: `v-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
           ...vehicleDto,
+          cab_type: cabType,
           driver,
         });
         driver.vehicle = await this.vehicleRepository.saveVehicleDetails(

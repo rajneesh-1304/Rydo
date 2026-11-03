@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -20,11 +21,17 @@ export class Users {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Generated('uuid')
-  @Column({ type: 'uuid', unique: true })
+  @Column({ type: 'varchar', length: 64, unique: true })
   uuid: string;
 
-  @Column({ unique: true })
+  @BeforeInsert()
+  generateUuid() {
+    if (!this.uuid) {
+      this.uuid = `u-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 8)}`;
+    }
+  }
+
+  @Column({ unique: true, nullable: true })
   firebase_uid?: string;
 
   @Column({ unique: true })
@@ -49,15 +56,15 @@ export class Users {
   dob?: Date;
 
   @Column({
-    type: 'enum',
-    enum: Status,
+    type: 'varchar',
+    length: 32,
     default: Status.ACTIVE,
   })
   status: Status;
 
   @Column({
-    type: 'enum',
-    enum: Role,
+    type: 'varchar',
+    length: 32,
     default: Role.USER,
   })
   role: Role;

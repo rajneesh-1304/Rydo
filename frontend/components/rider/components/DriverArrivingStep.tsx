@@ -52,6 +52,10 @@ export const DriverArrivingStep: React.FC<DriverArrivingStepProps> = ({
             <Typography className={styles.subtitle}>
               Arriving in {driverInfo.etaMinutes} min • {driverInfo.distanceKm} km away
             </Typography>
+            <Box className={styles.liveGpsPulseBadge}>
+              <Box className={styles.pulseDot} />
+              <span>Live GPS • Streaming every 5s</span>
+            </Box>
           </Box>
         </Box>
 

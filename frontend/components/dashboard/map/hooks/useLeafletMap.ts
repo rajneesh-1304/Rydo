@@ -7,6 +7,7 @@ interface UseLeafletMapOptions {
     initialCenter: Coordinates;
     zoom: number;
     nearbyCabs?: NearbyCab[];
+    liveDriverCoords?: Coordinates | null;
     onMapClick?: (coords: Coordinates) => void;
     onPickupDragEnd?: (coords: Coordinates) => void;
     onDropoffDragEnd?: (coords: Coordinates) => void;
@@ -16,6 +17,7 @@ export const useLeafletMap = ({
     initialCenter,
     zoom,
     nearbyCabs = [],
+    liveDriverCoords,
     onMapClick,
     onPickupDragEnd,
     onDropoffDragEnd,
@@ -24,6 +26,7 @@ export const useLeafletMap = ({
     const mapRef = useRef<any>(null);
     const pickupMarkerRef = useRef<any>(null);
     const dropoffMarkerRef = useRef<any>(null);
+    const driverLiveMarkerRef = useRef<any>(null);
     const routePolylineRef = useRef<any>(null);
     const cabsLayerRef = useRef<any>(null);
 
@@ -147,6 +150,56 @@ export const useLeafletMap = ({
 
         updateCabs();
     }, [nearbyCabs]);
+
+    // Live driver GPS marker tracking (updates every 5 seconds)
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        const updateDriverLiveMarker = async () => {
+            const L = await loadLeaflet();
+
+            if (!liveDriverCoords) {
+                if (driverLiveMarkerRef.current) {
+                    mapRef.current.removeLayer(driverLiveMarkerRef.current);
+                    driverLiveMarkerRef.current = null;
+                }
+                return;
+            }
+
+            if (!driverLiveMarkerRef.current) {
+                const driverIcon = L.divIcon({
+                    className: "custom-live-driver-marker",
+                    html: `
+                        <div style="background-color:#2563eb; color:#ffffff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 5px rgba(37,99,235,0.25), 0 4px 12px rgba(0,0,0,0.35); border:2.5px solid #ffffff; transition:all 0.8s ease;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z"/>
+                                <circle cx="7.5" cy="14.5" r="1.5"/>
+                                <circle cx="16.5" cy="14.5" r="1.5"/>
+                            </svg>
+                        </div>
+                    `,
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 17],
+                });
+
+                const marker = L.marker([liveDriverCoords.lat, liveDriverCoords.lng], {
+                    icon: driverIcon,
+                    zIndexOffset: 1000,
+                })
+                    .bindTooltip("Captain Amit • Live GPS", {
+                        direction: "top",
+                        offset: [0, -12],
+                    })
+                    .addTo(mapRef.current);
+
+                driverLiveMarkerRef.current = marker;
+            } else {
+                driverLiveMarkerRef.current.setLatLng([liveDriverCoords.lat, liveDriverCoords.lng]);
+            }
+        };
+
+        updateDriverLiveMarker();
+    }, [liveDriverCoords]);
 
     // Set or move Dropoff Marker
     const setDropoffMarker = useCallback(async (coords: Coordinates) => {

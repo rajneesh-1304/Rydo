@@ -1,22 +1,14 @@
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { DriverRepository } from 'src/infrastructure/repositories/driver.repository';
-import { RideRepository } from 'src/infrastructure/repositories/ride.repository';
+import { DriverRepository } from '../../../infrastructure/repositories/driver.repository';
+import { RideRepository } from '../../../infrastructure/repositories/ride.repository';
+import { Optional } from '@nestjs/common';
 
-@WebSocketGateway({ namespace: 'events'})
+@WebSocketGateway({ cors: { origin: '*' } })
 export class EventGateway {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly rideRepository: RideRepository,
-    private readonly driverRepository: DriverRepository
+    @Optional() private readonly rideRepository?: RideRepository,
+    @Optional() private readonly driverRepository?: DriverRepository,
   ) {}
 
   @WebSocketServer()
@@ -24,34 +16,31 @@ export class EventGateway {
 
   @SubscribeMessage('create-ride')
   async createRide(@MessageBody() data: any) {
-    const { rider_id, pickup_address, pickup_latitude, pickup_longitude, dropoff_address, dropoff_latitude, dropoff_longitude, distance, fare } = data;
-    const ride = this.rideRepository.create({
-      rider_id,
-      pickup_address,
-      pickup_latitude,
-      pickup_longitude,
-      dropoff_address,
-      dropoff_latitude,
-      dropoff_longitude,
-      distance,
-      fare,
-    });
-    await this.rideRepository.save(ride);
-    this.server.emit('ride-created', ride);
+    if (this.rideRepository) {
+      const ride = this.rideRepository.create(data);
+      await this.rideRepository.save(ride);
+      this.server.emit('ride-created', ride);
+      return ride;
+    }
+    this.server.emit('ride-created', data);
+    return data;
   }
 
   @SubscribeMessage('ride-created')
   async searchDriver(@MessageBody() data: any) {
-    const { rider_id, pickup_latitude, pickup_longitude } = data;
-    const driver = await this.driverRepository.findNearestDriver(
-      pickup_latitude,
-      pickup_longitude
-    );
-    this.
+    const { pickup_latitude, pickup_longitude } = data;
+    if (this.driverRepository) {
+      const driver = await this.driverRepository.findNearestDriver(
+        pickup_latitude,
+        pickup_longitude,
+      );
+      this.server.emit('driver-found', driver);
+      return driver;
+    }
   }
 
   @SubscribeMessage('request-ride')
-  handleMessage(@MessageBody() data: string) {
+  handleMessage(@MessageBody() data: any) {
     this.server.emit('ride-request-accepted', data);
     this.server.emit('ride-request-rejected', data);
   }

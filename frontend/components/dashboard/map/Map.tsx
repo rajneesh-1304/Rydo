@@ -13,6 +13,7 @@ import { searchLocation, reverseGeocodeLocation } from "./services/geocodingServ
 import { MapControls } from "./components/MapControls/MapControls";
 import { SearchOverlay } from "./components/SearchOverlay/SearchOverlay";
 import { MapLoading } from "./components/MapLoading/MapLoading";
+import { useAppSelector } from "@/store/hooks";
 
 import styles from "./Map.module.scss";
 
@@ -26,12 +27,24 @@ export const MapComponent: React.FC<MapProps> = ({
     nearbyCabs = [],
     pickupCoords: externalPickup,
     dropoffCoords: externalDropoff,
+    liveDriverCoords: externalLiveCoords,
     onMapClickCoords,
     onPickupChange,
     onDropoffChange,
     onRouteChange,
     drawRouteDirectly,
 }) => {
+    const liveLocation = useAppSelector((state) => state.location.driverLiveLocation);
+    const riderStep = useAppSelector((state) => state.ride.riderStep);
+    const driverTripState = useAppSelector((state) => state.driver.driverTripState);
+
+    const isTrackingActive =
+        riderStep === "driver_arriving" ||
+        riderStep === "trip_active" ||
+        driverTripState === "heading_to_pickup" ||
+        driverTripState === "in_progress";
+
+    const activeLiveCoords = externalLiveCoords || (isTrackingActive ? liveLocation : null);
     const [pickupCoords, setPickupCoords] = useState<Coordinates>(externalPickup || initialCenter);
     const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(externalDropoff || null);
     const [pickupAddress, setPickupAddress] = useState("Sector 22, Chandigarh");
@@ -67,6 +80,7 @@ export const MapComponent: React.FC<MapProps> = ({
         initialCenter,
         zoom,
         nearbyCabs,
+        liveDriverCoords: activeLiveCoords,
         // When user clicks the map:
         onMapClick: async (coords) => {
             if (onMapClickCoords) {
