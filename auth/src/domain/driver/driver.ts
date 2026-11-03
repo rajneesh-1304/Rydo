@@ -1,15 +1,16 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   Generated,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { Auth } from '../auth/auth';
+import { Status } from '../user/enums/status.enum';
 import { Vehicle } from './vehicle';
+import { Users } from '../user/user';
+import { Rides } from '../rides/rides.entity';
 
 @Entity('driver')
 export class Driver {
@@ -20,36 +21,26 @@ export class Driver {
   @Column({ type: 'uuid', unique: true })
   uuid: string;
 
-  @Column()
-  first_name: string;
-
-  @Column()
-  last_name: string;
-
-  @Column({ unique: true, nullable: true })
-  phone: string;
-
-  @Column({ nullable: true })
-  image: string;
-
-  @Column({ nullable: true })
-  gender: string;
-
-  @Column({ type: 'date', nullable: true })
-  dob: Date;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
-
-  @OneToOne(() => Auth, (auth) => auth.driver, {
-    onDelete: 'CASCADE',
+  @Column({
+    type: 'enum',
+    enum: Status,
+    default: Status.ACTIVE,
   })
-  @JoinColumn({ name: 'auth_id' })
-  auth: Auth;
+  status: Status;
 
-  @OneToOne(() => Vehicle, (vehicle) => vehicle.driver)
-  vehicle: Vehicle;
+  @OneToOne(() => Users, (user) => user.driver)
+  @JoinColumn({ name: 'user_id' })
+  user: Users;
+
+  @OneToOne(() => Vehicle, (vehicle) => vehicle.driver, {
+    cascade: true,
+  })
+  vehicle?: Vehicle;
+
+  @OneToMany(() => Rides, (ride) => ride.driver)
+  rider: Rides[]
+
+  public isActive(): boolean {
+    return this.status === Status.ACTIVE;
+  }
 }

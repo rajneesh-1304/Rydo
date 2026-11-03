@@ -13,7 +13,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import MapComponent from "../dashboard/map/Map";
 import { useTaxii } from "@/context/TaxiiContext";
-import styles from "../rider/RiderExperience.module.scss";
+import styles from "./DriverExperience.module.scss";
 
 export const DriverExperience: React.FC = () => {
   const {
@@ -56,7 +56,7 @@ export const DriverExperience: React.FC = () => {
     setDriverTripState("idle");
   };
 
-  // Determine active coordinates to show on driver's map
+  // Coordinates for Chandigarh driver
   const driverLocation = { lat: 30.7333, lng: 76.7794 };
   const targetLocation =
     driverTripState === "in_progress"
@@ -66,12 +66,10 @@ export const DriverExperience: React.FC = () => {
   return (
     <Box className={styles.pageContainer}>
       <Box className={styles.mainGrid}>
-        {/* Left Card: Driver Dashboard */}
         <Box className={styles.bookingCard}>
           <div>
-            {/* Header with Driver info & Online Switch */}
             <Box className={styles.cardHeader}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className={styles.headerRow}>
                 <div>
                   <Typography className={styles.title}>
                     Captain {driverProfile.name.split(" ")[0]}
@@ -81,27 +79,18 @@ export const DriverExperience: React.FC = () => {
                   </Typography>
                 </div>
 
-                {/* Online Toggle with clear active/inactive state */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    backgroundColor: isDriverOnline ? "#ecfdf5" : "#f1f5f9",
-                    padding: "4px 10px",
-                    borderRadius: "20px",
-                    border: `1px solid ${isDriverOnline ? "#a7f3d0" : "#cbd5e1"}`,
-                  }}
+                <div
+                  className={`${styles.statusPill} ${
+                    isDriverOnline ? styles.statusPillOnline : styles.statusPillOffline
+                  }`}
                 >
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: isDriverOnline ? "#059669" : "#64748b",
-                    }}
+                  <span
+                    className={`${styles.statusLabel} ${
+                      isDriverOnline ? styles.statusLabelOnline : styles.statusLabelOffline
+                    }`}
                   >
                     {isDriverOnline ? "Online" : "Offline"}
-                  </Typography>
+                  </span>
                   <Switch
                     checked={isDriverOnline}
                     onChange={(e) => {
@@ -113,187 +102,102 @@ export const DriverExperience: React.FC = () => {
                     color="success"
                     size="small"
                   />
-                </Box>
-              </Box>
+                </div>
+              </div>
             </Box>
 
-            {/* Quick tabs: Drive Dashboard | Earnings */}
-            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <div className={styles.tabBar}>
               <button
                 type="button"
-                className={styles.secondaryBtn}
-                style={{
-                  height: "34px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  backgroundColor: activeTab === "dashboard" ? "#000000" : "#ffffff",
-                  color: activeTab === "dashboard" ? "#ffffff" : "#000000",
-                  borderColor: activeTab === "dashboard" ? "#000000" : "#e2e8f0",
-                }}
+                className={`${styles.tabBtn} ${
+                  activeTab === "dashboard" ? styles.tabBtnActive : ""
+                }`}
                 onClick={() => setActiveTab("dashboard")}
               >
                 Drive Dashboard
               </button>
               <button
                 type="button"
-                className={styles.secondaryBtn}
-                style={{
-                  height: "34px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  backgroundColor: activeTab === "earnings" ? "#000000" : "#ffffff",
-                  color: activeTab === "earnings" ? "#ffffff" : "#000000",
-                  borderColor: activeTab === "earnings" ? "#000000" : "#e2e8f0",
-                }}
+                className={`${styles.tabBtn} ${
+                  activeTab === "earnings" ? styles.tabBtnActive : ""
+                }`}
                 onClick={() => setActiveTab("earnings")}
               >
                 Earnings & Stats
               </button>
-            </Box>
+            </div>
 
             {activeTab === "dashboard" && (
               <>
-                {/* Stats ribbon */}
-                <Box
-                  sx={{
-                    background: "#f8fafc",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
-                    p: 1.5,
-                    mb: 2,
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    textAlign: "center",
-                  }}
-                >
-                  <Box>
-                    <Typography sx={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
-                      Today&apos;s Earnings
-                    </Typography>
-                    <Typography sx={{ fontSize: "20px", fontWeight: 800, color: "#0f172a" }}>
-                      ₹{driverTodayEarnings}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ borderLeft: "1px solid #e2e8f0", borderRight: "1px solid #e2e8f0" }}>
-                    <Typography sx={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
-                      Trips Done
-                    </Typography>
-                    <Typography sx={{ fontSize: "20px", fontWeight: 800, color: "#0f172a" }}>
-                      {driverTripsCompleted}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography sx={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>
-                      Acceptance
-                    </Typography>
-                    <Typography sx={{ fontSize: "20px", fontWeight: 800, color: "#10b981" }}>
+                <div className={styles.statsRibbon}>
+                  <div className={styles.statCol}>
+                    <span className={styles.statLabel}>Today&apos;s Earnings</span>
+                    <span className={styles.statValue}>₹{driverTodayEarnings}</span>
+                  </div>
+                  <div className={`${styles.statCol} ${styles.statColBorder}`}>
+                    <span className={styles.statLabel}>Trips Done</span>
+                    <span className={styles.statValue}>{driverTripsCompleted}</span>
+                  </div>
+                  <div className={styles.statCol}>
+                    <span className={styles.statLabel}>Acceptance</span>
+                    <span className={`${styles.statValue} ${styles.statValueSuccess}`}>
                       {driverProfile.acceptanceRate}%
-                    </Typography>
-                  </Box>
-                </Box>
+                    </span>
+                  </div>
+                </div>
 
-                {/* TRIP STATE 1: ACCEPTED -> NAVIGATING TO USER LOCATION + OTP VERIFICATION */}
                 {(driverTripState === "heading_to_pickup" || driverTripState === "at_pickup") && (
-                  <Box
-                    sx={{
-                      border: "2px solid #2563eb",
-                      borderRadius: "14px",
-                      p: 2,
-                      mb: 2,
-                      backgroundColor: "#eff6ff",
-                      boxShadow: "0 4px 16px rgba(37, 99, 235, 0.12)",
-                    }}
-                  >
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <div className={styles.pickupStateCard}>
+                    <div className={styles.stateCardHeader}>
+                      <div className={styles.stateTitleWrap}>
                         <NavigationIcon sx={{ color: "#2563eb", fontSize: 20 }} />
-                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#1e3a8a" }}>
+                        <span className={styles.stateTitleBlue}>
                           Visiting Passenger Location
-                        </Typography>
-                      </Box>
-                      <Typography sx={{ fontSize: "18px", fontWeight: 900, color: "#1e3a8a" }}>
+                        </span>
+                      </div>
+                      <span className={styles.stateFareBlue}>
                         ₹{incomingRideDetails.fare}
-                      </Typography>
-                    </Box>
+                      </span>
+                    </div>
 
-                    {/* Passenger card with call/chat */}
-                    <Box
-                      sx={{
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #bfdbfe",
-                        borderRadius: "10px",
-                        p: 1.5,
-                        mb: 1.5,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
+                    <div className={styles.passengerCard}>
                       <div>
-                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+                        <div className={styles.passengerName}>
                           {incomingRideDetails.passengerName}
-                        </Typography>
-                        <Typography sx={{ fontSize: "11px", color: "#64748b" }}>
+                        </div>
+                        <div className={styles.passengerPickupDist}>
                           Pickup: {incomingRideDetails.pickup} (1.2 km away)
-                        </Typography>
+                        </div>
                       </div>
 
-                      <Box sx={{ display: "flex", gap: 1 }}>
+                      <div className={styles.actionBtnGroup}>
                         <button
                           type="button"
+                          className={styles.roundActionBtn}
                           onClick={() => alert(`Calling passenger: ${incomingRideDetails.passengerPhone}`)}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            border: "1px solid #cbd5e1",
-                            background: "#ffffff",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
+                          title="Call passenger"
                         >
-                          <PhoneIcon fontSize="small" sx={{ color: "#0f172a", fontSize: 16 }} />
+                          <PhoneIcon sx={{ color: "#0f172a", fontSize: 16 }} />
                         </button>
                         <button
                           type="button"
+                          className={styles.roundActionBtn}
                           onClick={() => setShowDriverChat(true)}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            border: "1px solid #cbd5e1",
-                            background: "#ffffff",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
+                          title="Chat with passenger"
                         >
-                          <ChatIcon fontSize="small" sx={{ color: "#0f172a", fontSize: 16 }} />
+                          <ChatIcon sx={{ color: "#0f172a", fontSize: 16 }} />
                         </button>
-                      </Box>
-                    </Box>
+                      </div>
+                    </div>
 
-                    {/* REQUIRED OTP INPUT: Driver MUST enter passenger OTP to start trip */}
-                    <Box
-                      sx={{
-                        backgroundColor: "#ffffff",
-                        border: "1.5px solid #2563eb",
-                        borderRadius: "12px",
-                        p: 2,
-                        mb: 1.5,
-                        textAlign: "center",
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.8, color: "#1e3a8a", fontWeight: 800, fontSize: "13px", mb: 0.5 }}>
+                    <div className={styles.otpVerifyBox}>
+                      <div className={styles.otpVerifyTitle}>
                         <KeyIcon fontSize="small" />
                         <span>Enter Passenger 4-Digit OTP</span>
-                      </Box>
-                      <Typography sx={{ fontSize: "11px", color: "#64748b", mb: 1.5 }}>
+                      </div>
+                      <div className={styles.otpVerifySubtitle}>
                         Ask passenger for the OTP shown on their screen to start the drive
-                      </Typography>
+                      </div>
 
                       <input
                         type="text"
@@ -304,165 +208,110 @@ export const DriverExperience: React.FC = () => {
                           setOtpInput(e.target.value);
                           setOtpError("");
                         }}
-                        style={{
-                          width: "160px",
-                          textAlign: "center",
-                          fontSize: "24px",
-                          fontWeight: 800,
-                          letterSpacing: "8px",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          border: "2px solid #cbd5e1",
-                          outline: "none",
-                          fontFamily: "monospace",
-                          marginBottom: "10px",
-                        }}
+                        className={styles.otpInput}
                       />
 
                       {otpError && (
-                        <div style={{ color: "#ef4444", fontSize: "12px", fontWeight: 600, marginBottom: "8px" }}>
+                        <div className={styles.otpError}>
                           {otpError}
                         </div>
                       )}
 
                       <button
                         type="button"
-                        className={styles.primaryBtn}
-                        style={{ backgroundColor: "#2563eb" }}
+                        className={styles.btnVerifyTrip}
                         onClick={handleVerifyAndStartTrip}
                       >
                         <CheckCircleOutlinedIcon fontSize="small" />
                         Verify OTP & Start Drive
                       </button>
-                    </Box>
+                    </div>
 
                     <button
                       type="button"
-                      className={styles.secondaryBtn}
-                      style={{ fontSize: "12px", height: "36px" }}
+                      className={styles.btnDeclineSecondary}
                       onClick={() => setShowDriverCancelModal(true)}
                     >
                       Cancel / Decline Trip
                     </button>
-                  </Box>
+                  </div>
                 )}
 
-                {/* TRIP STATE 2: ON TRIP (DRIVING TO DESTINATION AFTER OTP VERIFIED) */}
                 {driverTripState === "in_progress" && (
-                  <Box
-                    sx={{
-                      border: "2px solid #10b981",
-                      borderRadius: "14px",
-                      p: 2,
-                      mb: 2,
-                      backgroundColor: "#f0fdf4",
-                      boxShadow: "0 4px 16px rgba(16, 185, 129, 0.12)",
-                    }}
-                  >
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <div className={styles.inProgressCard}>
+                    <div className={styles.stateCardHeader}>
+                      <div className={styles.stateTitleWrap}>
                         <NavigationIcon sx={{ color: "#059669", fontSize: 20 }} />
-                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#065f46" }}>
+                        <span className={styles.stateTitleGreen}>
                           Drive In Progress (OTP Verified)
-                        </Typography>
-                      </Box>
-                      <Typography sx={{ fontSize: "18px", fontWeight: 800, color: "#065f46" }}>
+                        </span>
+                      </div>
+                      <span className={styles.stateFareGreen}>
                         ₹{incomingRideDetails.fare}
-                      </Typography>
-                    </Box>
+                      </span>
+                    </div>
 
-                    <Box sx={{ fontSize: "12px", color: "#334155", mb: 2, backgroundColor: "#ffffff", p: 1.5, borderRadius: "10px", border: "1px solid #bbf7d0" }}>
-                      <div style={{ color: "#059669", fontWeight: 700, marginBottom: "2px", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <div className={styles.destinationBox}>
+                      <div className={styles.destinationHeader}>
                         <LocationOnIcon fontSize="small" /> Heading to Destination:
                       </div>
-                      <div style={{ fontWeight: 800, fontSize: "13px" }}>
+                      <div className={styles.destinationText}>
                         {incomingRideDetails.dropoff}
                       </div>
-                      <div style={{ color: "#64748b", marginTop: "4px" }}>
+                      <div className={styles.destinationPassenger}>
                         Passenger: {incomingRideDetails.passengerName}
                       </div>
-                    </Box>
+                    </div>
 
                     <button
                       type="button"
-                      className={styles.primaryBtn}
-                      style={{ backgroundColor: "#059669" }}
+                      className={styles.btnCompleteTrip}
                       onClick={finishDriverTrip}
                     >
                       <CheckCircleOutlinedIcon fontSize="small" />
                       Complete Ride • Collect ₹{incomingRideDetails.fare}
                     </button>
-                  </Box>
+                  </div>
                 )}
 
-                {/* TRIP STATE 3: INCOMING RIDE REQUEST WITH MONEY & ACCEPT/DECLINE */}
                 {driverTripState === "idle" && hasIncomingRideRequest && isDriverOnline && (
-                  <Box
-                    sx={{
-                      border: "2px solid #000000",
-                      borderRadius: "14px",
-                      p: 2,
-                      mb: 2,
-                      backgroundColor: "#ffffff",
-                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.12)",
-                    }}
-                  >
-                    {/* Header with big money amount */}
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                  <div className={styles.incomingCard}>
+                    <div className={styles.incomingHeader}>
+                      <div className={styles.incomingTitleWrap}>
                         <BoltIcon sx={{ color: "#f59e0b" }} />
-                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#0f172a" }}>
+                        <span className={styles.incomingTitle}>
                           Incoming Ride Request
-                        </Typography>
-                      </Box>
-                      <Box sx={{ textAlign: "right" }}>
-                        <Typography sx={{ fontSize: "24px", fontWeight: 900, color: "#000000" }}>
+                        </span>
+                      </div>
+                      <div className={styles.incomingFareWrap}>
+                        <div className={styles.incomingFare}>
                           ₹{incomingRideDetails.fare}
-                        </Typography>
-                        <Typography sx={{ fontSize: "10px", color: "#10b981", fontWeight: 700 }}>
+                        </div>
+                        <div className={styles.incomingPaymentTag}>
                           CASH / UPI
-                        </Typography>
-                      </Box>
-                    </Box>
+                        </div>
+                      </div>
+                    </div>
 
-                    <Typography sx={{ fontSize: "12px", color: "#64748b", mb: 1.5 }}>
+                    <div className={styles.incomingTripMeta}>
                       {incomingRideDetails.distance} trip • ~{incomingRideDetails.duration} • Passenger: {incomingRideDetails.passengerName} (★ {incomingRideDetails.passengerRating})
-                    </Typography>
+                    </div>
 
-                    {/* Pickup & Drop Points */}
-                    <Box
-                      sx={{
-                        backgroundColor: "#f8fafc",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "10px",
-                        p: 1.5,
-                        mb: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 1,
-                        fontSize: "12px",
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <span style={{ color: "#10b981", fontWeight: 800 }}>● Pickup:</span>
-                        <span style={{ fontWeight: 600, color: "#1e293b" }}>{incomingRideDetails.pickup}</span>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <span style={{ color: "#ef4444", fontWeight: 800 }}>● Drop:</span>
-                        <span style={{ fontWeight: 600, color: "#1e293b" }}>{incomingRideDetails.dropoff}</span>
-                      </Box>
-                    </Box>
+                    <div className={styles.routePointsBox}>
+                      <div className={styles.pointRow}>
+                        <span className={styles.pickupDotLabel}>● Pickup:</span>
+                        <span className={styles.pointText}>{incomingRideDetails.pickup}</span>
+                      </div>
+                      <div className={styles.pointRow}>
+                        <span className={styles.dropoffDotLabel}>● Drop:</span>
+                        <span className={styles.pointText}>{incomingRideDetails.dropoff}</span>
+                      </div>
+                    </div>
 
-                    {/* Large Accept & Decline Buttons */}
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                    <div className={styles.actionGrid}>
                       <button
                         type="button"
-                        className={styles.secondaryBtn}
-                        style={{
-                          borderColor: "#ef4444",
-                          color: "#ef4444",
-                          fontWeight: 700,
-                        }}
+                        className={styles.btnDecline}
                         onClick={rejectIncomingRequest}
                       >
                         <CancelOutlinedIcon fontSize="small" />
@@ -471,109 +320,76 @@ export const DriverExperience: React.FC = () => {
 
                       <button
                         type="button"
-                        className={styles.primaryBtn}
-                        style={{
-                          backgroundColor: "#000000",
-                          fontWeight: 700,
-                        }}
+                        className={styles.btnAccept}
                         onClick={acceptIncomingRequest}
                       >
                         <CheckCircleOutlinedIcon fontSize="small" />
                         Accept
                       </button>
-                    </Box>
-                  </Box>
+                    </div>
+                  </div>
                 )}
 
-                {/* TRIP STATE 4: WAITING FOR RIDES */}
                 {driverTripState === "idle" && !hasIncomingRideRequest && (
-                  <Box
-                    sx={{
-                      textAlign: "center",
-                      py: 3,
-                      px: 2,
-                      backgroundColor: "#f8fafc",
-                      border: "1.5px dashed #cbd5e1",
-                      borderRadius: "12px",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "#1e293b", mb: 0.5 }}>
+                  <div className={styles.idleBox}>
+                    <div className={styles.idleTitle}>
                       {isDriverOnline ? "GPS Radar Active • Waiting for nearby ride requests..." : "You are currently Offline"}
-                    </Typography>
-                    <Typography sx={{ fontSize: "12px", color: "#64748b", mb: 2 }}>
+                    </div>
+                    <div className={styles.idleSubtitle}>
                       {isDriverOnline
                         ? "You will be alerted instantly when passengers nearby request a ride."
                         : "Turn on the Online switch at top right to start receiving trips."}
-                    </Typography>
+                    </div>
 
                     {isDriverOnline && (
                       <button
                         type="button"
-                        className={styles.secondaryBtn}
+                        className={styles.btnSimulate}
                         onClick={() => setHasIncomingRideRequest(true)}
                       >
                         ⚡ Simulate Incoming Request (₹220)
                       </button>
                     )}
-                  </Box>
+                  </div>
                 )}
               </>
             )}
 
-            {/* Earnings Tab */}
             {activeTab === "earnings" && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Box
-                  sx={{
-                    background: "#f8fafc",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
-                    p: 2,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "#0f172a", mb: 1.5 }}>
+              <div className={styles.earningsContainer}>
+                <div className={styles.breakdownCard}>
+                  <div className={styles.breakdownTitle}>
                     Today&apos;s Earnings Breakdown
-                  </Typography>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#475569", py: 0.5 }}>
+                  </div>
+                  <div className={styles.breakdownRow}>
                     <span>Trip Fares ({driverTripsCompleted} completed)</span>
-                    <span style={{ fontWeight: 600 }}>₹{driverTodayEarnings - 170}</span>
-                  </Box>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#475569", py: 0.5 }}>
+                    <span className={styles.breakdownRowBold}>₹{driverTodayEarnings - 170}</span>
+                  </div>
+                  <div className={styles.breakdownRow}>
                     <span>Peak Surge Incentives</span>
-                    <span style={{ fontWeight: 600 }}>₹170</span>
-                  </Box>
-                  <Box sx={{ borderTop: "1px solid #e2e8f0", mt: 1.5, pt: 1.5, display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: 800, color: "#0f172a" }}>
+                    <span className={styles.breakdownRowBold}>₹170</span>
+                  </div>
+                  <div className={styles.breakdownTotalRow}>
                     <span>Total Credited Today</span>
-                    <span style={{ color: "#10b981" }}>₹{driverTodayEarnings}</span>
-                  </Box>
-                </Box>
+                    <span className={styles.breakdownTotalVal}>₹{driverTodayEarnings}</span>
+                  </div>
+                </div>
 
-                <Box
-                  sx={{
-                    background: "#ffffff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
-                    p: 2,
-                    fontSize: "12px",
-                    color: "#475569",
-                  }}
-                >
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#0f172a", mb: 1 }}>
+                <div className={styles.payoutAccountCard}>
+                  <div className={styles.payoutTitle}>
                     Payout Account Details
-                  </Typography>
+                  </div>
                   <div>Bank: HDFC Bank (Savings)</div>
                   <div>Account: **** **** 4812 (Verified)</div>
-                  <div style={{ color: "#10b981", fontWeight: 600, marginTop: "6px" }}>
+                  <div className={styles.payoutActiveBadge}>
                     ✓ Daily automatic payouts active
                   </div>
-                </Box>
-              </Box>
+                </div>
+              </div>
             )}
           </div>
         </Box>
 
-        {/* Right Card: Google-like Interactive Navigation Map */}
         <Box className={styles.mapCard}>
           <MapComponent
             initialCenter={driverLocation}
@@ -586,7 +402,6 @@ export const DriverExperience: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Driver Cancel Confirmation Modal */}
       {showDriverCancelModal && (
         <div
           className={styles.modalOverlay}
@@ -629,49 +444,29 @@ export const DriverExperience: React.FC = () => {
         </div>
       )}
 
-      {/* Driver Passenger Chat Modal */}
       {showDriverChat && (
         <div
           className={styles.modalOverlay}
           onClick={() => setShowDriverChat(false)}
         >
           <div
-            className={styles.cancelModalCard}
-            style={{ maxWidth: "380px" }}
+            className={styles.chatModalCard}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", fontWeight: 700 }}>
+            <h3 className={styles.chatTitle}>
               Chat with {incomingRideDetails.passengerName}
             </h3>
-            <div
-              style={{
-                backgroundColor: "#f8fafc",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                marginBottom: "12px",
-                fontSize: "13px",
-                color: "#334155",
-              }}
-            >
+            <div className={styles.chatMsgBubble}>
               <strong>Passenger:</strong> Hi Captain, I am waiting right outside the main gate with OTP ready!
             </div>
             <input
               type="text"
               placeholder="Reply to passenger..."
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                border: "1px solid #e2e8f0",
-                marginBottom: "14px",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
+              className={styles.chatInput}
             />
             <button
               type="button"
-              className={styles.primaryBtn}
+              className={styles.btnPrimary}
               onClick={() => setShowDriverChat(false)}
             >
               Send Reply

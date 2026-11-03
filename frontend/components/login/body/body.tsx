@@ -1,634 +1,230 @@
 "use client";
 
-import {
-    Box,
-    Button,
-    IconButton,
-    InputAdornment,
-    TextField,
-    Typography,
-} from "@mui/material";
-import PersonIcon from '@mui/icons-material/Person';
-import MailIcon from '@mui/icons-material/Mail';
-import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import React, { useState } from "react";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
+import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
+import PersonIcon from "@mui/icons-material/Person";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useTaxii } from "@/context/TaxiiContext";
-
-import styles from "./body.module.scss";
+import { AuthRole } from "../Login";
 import {
-    captainLoginSchema,
-    captainRegisterSchema,
-    loginSchema,
-    registerSchema,
+  UserOnboardingFormData,
+  DriverPersonalFormData,
+  DriverVehicleFormData,
 } from "./body.schema";
-import { AuthPage, AuthRole } from "../Login";
+import { UserModal } from "../modals/UserModal";
+import { DriverModal } from "../modals/DriverModal";
+import styles from "./body.module.scss";
 
 type Props = {
-    role: AuthRole;
-    setRole: (role: AuthRole) => void;
-    page: AuthPage;
-    setPage: (page: AuthPage) => void;
+  role: AuthRole;
+  setRole: (role: AuthRole) => void;
 };
 
-type RegisterFormData = z.infer<typeof registerSchema>;
-type LoginFormData = z.infer<typeof loginSchema>;
-type CaptainRegisterFormData = z.infer<typeof captainRegisterSchema>;
-type CaptainLoginFormData = z.infer<typeof captainLoginSchema>;
+const HeaderBody: React.FC<Props> = ({ role, setRole }) => {
+  const router = useRouter();
+  const { setIsLoggedIn, setAppMode, updateRiderProfile, updateDriverProfile } = useTaxii();
 
-const HeaderBody = ({ role, setRole, page, setPage }: Props) => {
-    const [showPassword, setShowPassword] = useState(false);
+  const isCaptain = role === "captain";
 
-    const isCaptain = role === "captain";
-    const isRegister = page === "register";
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [activeModal, setActiveModal] = useState<"none" | "user_profile" | "driver_step1" | "driver_step2">("none");
+  const [savedDriverPersonal, setSavedDriverPersonal] = useState<DriverPersonalFormData | null>(null);
 
-    const userRegisterForm = useForm<RegisterFormData>({
-        resolver: zodResolver(registerSchema),
+  const googleMockUser = {
+    email: isCaptain ? "captain.driver@gmail.com" : "rider.passenger@gmail.com",
+    first_name: isCaptain ? "Amit" : "Rajneesh",
+    last_name: isCaptain ? "Kumar" : "Sharma",
+    avatar: "/amit-driver.jpg",
+  };
+
+  const handleGoogleSignInClick = () => {
+    setIsAuthenticating(true);
+    setTimeout(() => {
+      setIsAuthenticating(false);
+      if (isCaptain) {
+        setActiveModal("driver_step1");
+      } else {
+        setActiveModal("user_profile");
+      }
+    }, 600);
+  };
+
+  const onUserSubmit = (data: UserOnboardingFormData) => {
+    updateRiderProfile({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone: data.phone,
+      gender: data.gender,
+      dob: data.dob,
+      avatar: data.image || googleMockUser.avatar,
+      email: googleMockUser.email,
     });
+    setIsLoggedIn(true);
+    setAppMode("rider");
+    setActiveModal("none");
+    router.push("/dashboard");
+  };
 
-    const userLoginForm = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
+  const onDriverStep1Submit = (data: DriverPersonalFormData) => {
+    setSavedDriverPersonal(data);
+    setActiveModal("driver_step2");
+  };
+
+  const onDriverStep2Submit = (vehicleData: DriverVehicleFormData) => {
+    const personal = savedDriverPersonal;
+    if (!personal) return;
+
+    updateDriverProfile({
+      first_name: personal.first_name,
+      last_name: personal.last_name,
+      phone: personal.phone,
+      gender: personal.gender,
+      dob: personal.dob,
+      avatar: personal.image || "/amit-driver.jpg",
+      email: googleMockUser.email,
+      vehicle: {
+        model: vehicleData.model,
+        plate_number: vehicleData.plate_number,
+        color: vehicleData.color,
+        license_number: vehicleData.license_number,
+        license_expiration_date: vehicleData.license_expiration_date,
+        insurance_number: vehicleData.insurance_number,
+        insurance_expiration_date: vehicleData.insurance_expiration_date,
+        car_image: vehicleData.car_image,
+      },
     });
+    setIsLoggedIn(true);
+    setAppMode("driver");
+    setActiveModal("none");
+    router.push("/dashboard");
+  };
 
-    const captainRegisterForm = useForm<CaptainRegisterFormData>({
-        resolver: zodResolver(captainRegisterSchema),
-        defaultValues: {
-            agreeTerms: false,
-        },
-    });
+  return (
+    <Box className={styles.container}>
+      <Box className={styles.splitCard}>
+        <Box className={styles.heroBanner}>
+          <Box className={styles.brandRow}>
+            <Typography component="span" className={styles.brandName}>
+              Rydo
+            </Typography>
+            <Typography component="span" className={styles.brandRole}>
+              {isCaptain ? "Captain (Driver)" : "Rider (Passenger)"}
+            </Typography>
+          </Box>
 
-    const captainLoginForm = useForm<CaptainLoginFormData>({
-        resolver: zodResolver(captainLoginSchema),
-    });
+          <Box className={styles.heroContent}>
+            <Typography component="h1" className={styles.heroTitle}>
+              {isCaptain
+                ? "Drive with Rydo.\nEarn on your terms."
+                : "Ride with Rydo.\nFast, safe & reliable."}
+            </Typography>
+            <Typography component="p" className={styles.heroSubtitle}>
+              {isCaptain
+                ? "Sign in with Google to manage your driver earnings, active trips, and vehicle fleet."
+                : "Sign in with Google to instantly book cabs, track nearby drivers, and ride with ease."}
+            </Typography>
+          </Box>
 
-    const router = useRouter();
-    const { setIsLoggedIn, setAppMode } = useTaxii();
-
-    const onUserRegisterSubmit = (data: RegisterFormData) => {
-        console.log("Passenger Register:", data);
-        setIsLoggedIn(true);
-        setAppMode("rider");
-        router.push("/dashboard");
-    };
-
-    const onUserLoginSubmit = (data: LoginFormData) => {
-        console.log("Passenger Login:", data);
-        setIsLoggedIn(true);
-        setAppMode("rider");
-        router.push("/dashboard");
-    };
-
-    const onCaptainRegisterSubmit = (data: CaptainRegisterFormData) => {
-        console.log("Captain Register:", data);
-        setIsLoggedIn(true);
-        setAppMode("driver");
-        router.push("/dashboard");
-    };
-
-    const onCaptainLoginSubmit = (data: CaptainLoginFormData) => {
-        console.log("Captain Login:", data);
-        setIsLoggedIn(true);
-        setAppMode("driver");
-        router.push("/dashboard");
-    };
-
-    // Hero banner text configurations
-    const getHeroTitle = () => {
-        if (isCaptain) {
-            return isRegister ? "Drive when\nyou want" : "Welcome back,\nCaptain";
-        }
-        return isRegister ? "Ride anywhere,\nanytime" : "Welcome back,\nRider";
-    };
-
-    const getHeroSubtitle = () => {
-        if (isCaptain) {
-            return isRegister
-                ? "Be your own boss. Get paid.\nMake a difference."
-                : "Sign in to view your rides,\nearnings and daily trips.";
-        }
-        return isRegister
-            ? "Request a ride in seconds.\nFast, safe, and reliable."
-            : "Sign in to book rides,\ntrack trips and view your history.";
-    };
-
-    return (
-        <Box className={styles.container}>
-            <Box className={styles.splitCard}>
-                {/* Left Side: Hero Banner */}
-                <Box className={styles.heroBanner}>
-                    <Box className={styles.brandRow}>
-                        <Typography className={styles.brandName}>Rydo</Typography>
-                        <Typography className={styles.brandRole}>
-                            {isCaptain ? "Driver" : "Rider"}
-                        </Typography>
-                    </Box>
-
-                    <Box className={styles.heroContent}>
-                        <Typography className={styles.heroTitle}>
-                            {getHeroTitle()}
-                        </Typography>
-                        <Typography className={styles.heroSubtitle}>
-                            {getHeroSubtitle()}
-                        </Typography>
-                    </Box>
-
-                    <Box className={styles.heroImageContainer}>
-                        <Image
-                            src="/driver-hero.jpg"
-                            alt="Car illustration"
-                            width={420}
-                            height={250}
-                            className={styles.heroImage}
-                            priority
-                        />
-                    </Box>
-                </Box>
-
-                {/* Right Side: Form Area */}
-                <Box className={styles.formArea}>
-                    <Box className={styles.formHeader}>
-                        <Typography className={styles.title}>
-                            {isCaptain
-                                ? isRegister
-                                    ? "Create your driver account"
-                                    : "Sign in to your driver account"
-                                : isRegister
-                                    ? "Create your rider account"
-                                    : "Sign in to your account"}
-                        </Typography>
-                        <Typography className={styles.subtitle}>
-                            {isRegister
-                                ? "Fill in your details to get started with Rydo."
-                                : "Enter your credentials to access your dashboard."}
-                        </Typography>
-                    </Box>
-
-                    {/* 1. CAPTAIN REGISTER */}
-                    {isCaptain && isRegister && (
-                        <Box
-                            component="form"
-                            className={styles.form}
-                            onSubmit={captainRegisterForm.handleSubmit(onCaptainRegisterSubmit)}
-                        >
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Full name</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Enter your full name"
-                                    className={styles.textfield}
-                                    {...captainRegisterForm.register("fullName")}
-                                    error={!!captainRegisterForm.formState.errors.fullName}
-                                    helperText={captainRegisterForm.formState.errors.fullName?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PersonIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Email address</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="you@example.com"
-                                    className={styles.textfield}
-                                    {...captainRegisterForm.register("email")}
-                                    error={!!captainRegisterForm.formState.errors.email}
-                                    helperText={captainRegisterForm.formState.errors.email?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <MailIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Mobile number</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="+91 98765 43210"
-                                    className={styles.textfield}
-                                    {...captainRegisterForm.register("mobileNumber")}
-                                    error={!!captainRegisterForm.formState.errors.mobileNumber}
-                                    helperText={captainRegisterForm.formState.errors.mobileNumber?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PhoneOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Password</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Create a password"
-                                    type={showPassword ? "text" : "password"}
-                                    className={styles.textfield}
-                                    {...captainRegisterForm.register("password")}
-                                    error={!!captainRegisterForm.formState.errors.password}
-                                    helperText={captainRegisterForm.formState.errors.password?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        edge="end"
-                                                        size="small"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                    >
-                                                        {showPassword ? (
-                                                            <VisibilityOffIcon fontSize="small" />
-                                                        ) : (
-                                                            <VisibilityIcon fontSize="small" />
-                                                        )}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box>
-                                <label className={styles.checkboxContainer}>
-                                    <input
-                                        type="checkbox"
-                                        className={styles.checkboxInput}
-                                        {...captainRegisterForm.register("agreeTerms")}
-                                    />
-                                    <span className={styles.checkboxText}>
-                                        I agree to the Rydo Driver <span>Terms and Conditions</span> and{" "}
-                                        <span>Privacy Policy</span>.
-                                    </span>
-                                </label>
-                                {captainRegisterForm.formState.errors.agreeTerms && (
-                                    <Typography color="error" variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                                        {captainRegisterForm.formState.errors.agreeTerms.message}
-                                    </Typography>
-                                )}
-                            </Box>
-
-                            <Button
-                                className={styles.submitBtn}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                            >
-                                <span>Create Account</span>
-                                <ArrowForwardIcon fontSize="small" />
-                            </Button>
-                        </Box>
-                    )}
-
-                    {/* 2. CAPTAIN LOGIN */}
-                    {isCaptain && !isRegister && (
-                        <Box
-                            component="form"
-                            className={styles.form}
-                            onSubmit={captainLoginForm.handleSubmit(onCaptainLoginSubmit)}
-                        >
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Email address</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="you@example.com"
-                                    className={styles.textfield}
-                                    {...captainLoginForm.register("email")}
-                                    error={!!captainLoginForm.formState.errors.email}
-                                    helperText={captainLoginForm.formState.errors.email?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <MailIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Password</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Enter your password"
-                                    type={showPassword ? "text" : "password"}
-                                    className={styles.textfield}
-                                    {...captainLoginForm.register("password")}
-                                    error={!!captainLoginForm.formState.errors.password}
-                                    helperText={captainLoginForm.formState.errors.password?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        edge="end"
-                                                        size="small"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                    >
-                                                        {showPassword ? (
-                                                            <VisibilityOffIcon fontSize="small" />
-                                                        ) : (
-                                                            <VisibilityIcon fontSize="small" />
-                                                        )}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Button
-                                className={styles.submitBtn}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                            >
-                                <span>Sign In</span>
-                                <ArrowForwardIcon fontSize="small" />
-                            </Button>
-                        </Box>
-                    )}
-
-                    {/* 3. PASSENGER REGISTER */}
-                    {!isCaptain && isRegister && (
-                        <Box
-                            component="form"
-                            className={styles.form}
-                            onSubmit={userRegisterForm.handleSubmit(onUserRegisterSubmit)}
-                        >
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Full name</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Enter your full name"
-                                    className={styles.textfield}
-                                    {...userRegisterForm.register("fullName")}
-                                    error={!!userRegisterForm.formState.errors.fullName}
-                                    helperText={userRegisterForm.formState.errors.fullName?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PersonIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Email address</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="you@example.com"
-                                    className={styles.textfield}
-                                    {...userRegisterForm.register("email")}
-                                    error={!!userRegisterForm.formState.errors.email}
-                                    helperText={userRegisterForm.formState.errors.email?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <MailIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Mobile number (Optional)</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="+91 98765 43210"
-                                    className={styles.textfield}
-                                    {...userRegisterForm.register("mobileNumber")}
-                                    error={!!userRegisterForm.formState.errors.mobileNumber}
-                                    helperText={userRegisterForm.formState.errors.mobileNumber?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PhoneOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Password</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Create a password"
-                                    type={showPassword ? "text" : "password"}
-                                    className={styles.textfield}
-                                    {...userRegisterForm.register("password")}
-                                    error={!!userRegisterForm.formState.errors.password}
-                                    helperText={userRegisterForm.formState.errors.password?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        edge="end"
-                                                        size="small"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                    >
-                                                        {showPassword ? (
-                                                            <VisibilityOffIcon fontSize="small" />
-                                                        ) : (
-                                                            <VisibilityIcon fontSize="small" />
-                                                        )}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Button
-                                className={styles.submitBtn}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                            >
-                                <span>Create Account</span>
-                                <ArrowForwardIcon fontSize="small" />
-                            </Button>
-                        </Box>
-                    )}
-
-                    {/* 4. PASSENGER LOGIN */}
-                    {!isCaptain && !isRegister && (
-                        <Box
-                            component="form"
-                            className={styles.form}
-                            onSubmit={userLoginForm.handleSubmit(onUserLoginSubmit)}
-                        >
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Email address</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="you@example.com"
-                                    className={styles.textfield}
-                                    {...userLoginForm.register("email")}
-                                    error={!!userLoginForm.formState.errors.email}
-                                    helperText={userLoginForm.formState.errors.email?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <MailIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Box className={styles.field}>
-                                <Typography className={styles.label}>Password</Typography>
-                                <TextField
-                                    size="small"
-                                    placeholder="Enter your password"
-                                    type={showPassword ? "text" : "password"}
-                                    className={styles.textfield}
-                                    {...userLoginForm.register("password")}
-                                    error={!!userLoginForm.formState.errors.password}
-                                    helperText={userLoginForm.formState.errors.password?.message}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockOutlinedIcon className={styles.inputIcon} fontSize="small" />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        edge="end"
-                                                        size="small"
-                                                        onClick={() => setShowPassword(!showPassword)}
-                                                    >
-                                                        {showPassword ? (
-                                                            <VisibilityOffIcon fontSize="small" />
-                                                        ) : (
-                                                            <VisibilityIcon fontSize="small" />
-                                                        )}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        },
-                                    }}
-                                />
-                            </Box>
-
-                            <Button
-                                className={styles.submitBtn}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                            >
-                                <span>Sign In</span>
-                                <ArrowForwardIcon fontSize="small" />
-                            </Button>
-                        </Box>
-                    )}
-
-                    {/* Divider */}
-                    <Box className={styles.divider}>
-                        <Typography className={styles.dividerText}>OR</Typography>
-                    </Box>
-
-                    {/* Google Button */}
-                    <Button className={styles.googleBtn} fullWidth>
-                        <Image
-                            src="/google.svg"
-                            alt="Google"
-                            width={18}
-                            height={18}
-                        />
-                        <Typography className={styles.googleBtnText}>
-                            Continue with Google
-                        </Typography>
-                    </Button>
-
-                    {/* Footer Navigation */}
-                    <Box className={styles.footer}>
-                        <Typography className={styles.footerLink}>
-                            {isRegister ? "Already have an account?" : "Don't have an account?"}
-                            <button
-                                type="button"
-                                onClick={() => setPage(isRegister ? "login" : "register")}
-                            >
-                                {isRegister ? "Sign in" : "Sign up"}
-                            </button>
-                        </Typography>
-
-                        <button
-                            type="button"
-                            className={styles.roleToggleLink}
-                            onClick={() => {
-                                setRole(isCaptain ? "user" : "captain");
-                                setPage(isRegister ? "register" : "login");
-                            }}
-                        >
-                            {isCaptain
-                                ? "Looking to ride instead? Join as a passenger"
-                                : "Looking to drive instead? Sign in as Captain"}
-                        </button>
-                    </Box>
-                </Box>
-            </Box>
+          <Box className={styles.heroImageContainer}>
+            <Image
+              src="/driver-hero.jpg"
+              alt="Rydo illustration"
+              width={420}
+              height={250}
+              className={styles.heroImage}
+              priority
+            />
+          </Box>
         </Box>
-    );
+
+        <Box className={styles.formArea}>
+          <Box className={styles.roleSelector}>
+            <Button
+              type="button"
+              className={`${styles.roleBtn} ${!isCaptain ? styles.roleBtnActive : ""}`}
+              onClick={() => setRole("user")}
+            >
+              <PersonIcon fontSize="small" />
+              <span>Rider Portal</span>
+            </Button>
+            <Button
+              type="button"
+              className={`${styles.roleBtn} ${isCaptain ? styles.roleBtnActive : ""}`}
+              onClick={() => setRole("captain")}
+            >
+              <DirectionsCarFilledIcon fontSize="small" />
+              <span>Driver Portal</span>
+            </Button>
+          </Box>
+
+          <Box className={styles.formHeader}>
+            <Typography component="h2" className={styles.title}>
+              {isCaptain ? "Sign in to Driver Portal" : "Sign in to Rider Portal"}
+            </Typography>
+            <Typography component="p" className={styles.subtitle}>
+              {isCaptain
+                ? "Sign in with your verified Google account to access your captain console."
+                : "Sign in with your verified Google account to book rides across the city."}
+            </Typography>
+          </Box>
+
+          <Button
+            type="button"
+            className={styles.googleBtnLarge}
+            onClick={handleGoogleSignInClick}
+            disabled={isAuthenticating}
+          >
+            {isAuthenticating ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <Image
+                src="/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+              />
+            )}
+            <Typography component="span" className={styles.googleBtnText}>
+              {isAuthenticating
+                ? "Connecting to Google..."
+                : "Sign in with Google"}
+            </Typography>
+          </Button>
+
+          <Box className={styles.trustRow}>
+            <VerifiedUserIcon fontSize="small" className={styles.trustIcon} />
+            <Typography component="span" variant="caption">
+              Fast, secure 1-tap verification. No passwords required.
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Rider Onboarding Modal */}
+      <UserModal
+        isOpen={activeModal === "user_profile"}
+        onClose={() => setActiveModal("none")}
+        onSubmit={onUserSubmit}
+        googleMockUser={googleMockUser}
+        isLoading={isAuthenticating}
+      />
+
+      {/* Driver Onboarding Multi-step Modal */}
+      <DriverModal
+        isOpen={activeModal === "driver_step1" || activeModal === "driver_step2"}
+        step={activeModal === "driver_step2" ? "driver_step2" : "driver_step1"}
+        onClose={() => setActiveModal("none")}
+        onStep1Submit={onDriverStep1Submit}
+        onStep2Submit={onDriverStep2Submit}
+        onBackToStep1={() => setActiveModal("driver_step1")}
+        googleMockUser={googleMockUser}
+        isLoading={isAuthenticating}
+      />
+    </Box>
+  );
 };
 
 export default HeaderBody;

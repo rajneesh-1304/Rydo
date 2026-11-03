@@ -41,7 +41,7 @@ export class Vehicle {
   insurance_expiration_date: Date;
 
   @Column({ nullable: true })
-  car_image: string;
+  car_image?: string;
 
   @CreateDateColumn()
   created_at: Date;

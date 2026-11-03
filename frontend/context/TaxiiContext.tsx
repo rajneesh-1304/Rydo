@@ -27,9 +27,25 @@ export type RiderStep =
   | "trip_active" // Live on-trip navigation
   | "completed"; // Screen 5: Ride completed
 
+export interface VehicleDetails {
+  model: string;
+  plate_number: string;
+  color: string;
+  license_number: string;
+  license_expiration_date: string;
+  insurance_number: string;
+  insurance_expiration_date: string;
+  car_image?: string;
+}
+
 export interface RiderProfile {
   name: string;
-  role: string;
+  first_name?: string;
+  last_name?: string;
+  gender?: string;
+  dob?: string;
+  image?: string;
+  role?: string;
   phone: string;
   email: string;
   rating: number;
@@ -42,7 +58,12 @@ export interface RiderProfile {
 
 export interface DriverProfile {
   name: string;
-  role: string;
+  first_name?: string;
+  last_name?: string;
+  gender?: string;
+  dob?: string;
+  image?: string;
+  role?: string;
   phone: string;
   email: string;
   rating: number;
@@ -54,14 +75,16 @@ export interface DriverProfile {
   vehiclePlate: string;
   licenseNumber: string;
   totalEarnings: number;
+  vehicle?: VehicleDetails;
 }
 
 export interface TaxiiContextType {
-  // Navigation / mode
   appMode: "rider" | "driver";
   setAppMode: (mode: "rider" | "driver") => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (val: boolean) => void;
+  updateRiderProfile: (data: Partial<RiderProfile>) => void;
+  updateDriverProfile: (data: Partial<DriverProfile>) => void;
 
   // Rider Booking Flow
   riderStep: RiderStep;
@@ -313,7 +336,6 @@ export const TaxiiProvider: React.FC<{ children: React.ReactNode }> = ({
     "home" | "earnings" | "profile"
   >("home");
 
-  // Driver Trip flow states: idle -> heading_to_pickup -> at_pickup -> in_progress -> completed
   const [driverTripState, setDriverTripState] = useState<
     "idle" | "heading_to_pickup" | "at_pickup" | "in_progress" | "completed"
   >("idle");
@@ -332,10 +354,12 @@ export const TaxiiProvider: React.FC<{ children: React.ReactNode }> = ({
     dropoffCoords: { lat: 30.7055, lng: 76.8013 },
   };
 
-  // Distinct Profiles
-  const riderProfile: RiderProfile = {
+  const [riderProfile, setRiderProfile] = useState<RiderProfile>({
     name: "Rajneesh Kumar",
-    role: "Verified Rider",
+    first_name: "Rajneesh",
+    last_name: "Kumar",
+    gender: "Male",
+    role: "Rider",
     phone: "+91 98765 12340",
     email: "rajneesh@taxii.in",
     rating: 4.9,
@@ -347,11 +371,14 @@ export const TaxiiProvider: React.FC<{ children: React.ReactNode }> = ({
       { label: "Home", address: "Sector 22, Chandigarh" },
       { label: "Work", address: "Rajiv Gandhi IT Park, Chandigarh" },
     ],
-  };
+  });
 
-  const driverProfile: DriverProfile = {
+  const [driverProfile, setDriverProfile] = useState<DriverProfile>({
     name: "Amit Kumar",
-    role: "Captain (Driver)",
+    first_name: "Amit",
+    last_name: "Kumar",
+    gender: "Male",
+    role: "Driver",
     phone: "+91 98123 45678",
     email: "amit.kumar@taxii.in",
     rating: 4.8,
@@ -363,6 +390,57 @@ export const TaxiiProvider: React.FC<{ children: React.ReactNode }> = ({
     vehiclePlate: "PB 01 AB 1234",
     licenseNumber: "DL-0420190012345",
     totalEarnings: 34850,
+    vehicle: {
+      model: "Maruti Suzuki Swift",
+      plate_number: "PB 01 AB 1234",
+      color: "White",
+      license_number: "DL-0420190012345",
+      license_expiration_date: "2029-12-31",
+      insurance_number: "INS-9921827",
+      insurance_expiration_date: "2027-05-15",
+      car_image: "/car.png",
+    },
+  });
+
+  const updateRiderProfile = (data: Partial<RiderProfile>) => {
+    setRiderProfile((prev) => {
+      const updatedName =
+        data.first_name && data.last_name
+          ? `${data.first_name} ${data.last_name}`
+          : data.name || prev.name;
+      return {
+        ...prev,
+        ...data,
+        name: updatedName,
+      };
+    });
+  };
+
+  const updateDriverProfile = (data: Partial<DriverProfile>) => {
+    setDriverProfile((prev) => {
+      const updatedName =
+        data.first_name && data.last_name
+          ? `${data.first_name} ${data.last_name}`
+          : data.name || prev.name;
+      const vehicleDetailsStr = data.vehicle
+        ? `${data.vehicle.model} (${data.vehicle.color})`
+        : prev.vehicleDetails;
+      const vehiclePlateStr = data.vehicle
+        ? data.vehicle.plate_number
+        : prev.vehiclePlate;
+      const licenseNumStr = data.vehicle
+        ? data.vehicle.license_number
+        : prev.licenseNumber;
+
+      return {
+        ...prev,
+        ...data,
+        name: updatedName,
+        vehicleDetails: vehicleDetailsStr,
+        vehiclePlate: vehiclePlateStr,
+        licenseNumber: licenseNumStr,
+      };
+    });
   };
 
   const userProfile = appMode === "driver" ? driverProfile : riderProfile;
@@ -546,6 +624,8 @@ export const TaxiiProvider: React.FC<{ children: React.ReactNode }> = ({
         riderProfile,
         driverProfile,
         userProfile,
+        updateRiderProfile,
+        updateDriverProfile,
       }}
     >
       {children}

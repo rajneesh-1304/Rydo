@@ -38,7 +38,6 @@ export const ProfileView: React.FC = () => {
     setIsLoggedIn,
   } = useTaxii();
 
-  // Pure strict separation based on logged in role
   const isDriver = appMode === "driver";
   const [activeFilter, setActiveFilter] = useState<"All" | "Completed" | "Active">("All");
 
@@ -80,12 +79,8 @@ export const ProfileView: React.FC = () => {
   return (
     <Box className={styles.container}>
       <Box className={styles.splitCard}>
-        {/* ============================================================== */}
-        {/* DRIVER PROFILE ONLY (When logged in as Driver)                 */}
-        {/* ============================================================== */}
         {isDriver ? (
           <>
-            {/* Left Driver Profile Info */}
             <Box className={styles.heroBanner}>
               <div>
                 <div className={styles.profileTop}>
@@ -102,13 +97,12 @@ export const ProfileView: React.FC = () => {
                   <div className={styles.userRole}>
                     <span>★ {driverProfile.rating}</span>
                     <span>•</span>
-                    <span style={{ color: "#059669", fontWeight: 700 }}>
+                    <span className={styles.captainRoleLabel}>
                       Captain (Driver)
                     </span>
                   </div>
                 </div>
 
-                {/* Driver Stats */}
                 <div className={styles.statsRow}>
                   <div className={styles.statItem}>
                     <div className={styles.statVal}>{driverProfile.totalRides}</div>
@@ -121,14 +115,13 @@ export const ProfileView: React.FC = () => {
                   </div>
                   <div className={styles.statDivider} />
                   <div className={styles.statItem}>
-                    <div className={styles.statVal} style={{ color: "#059669" }}>
+                    <div className={`${styles.statVal} ${styles.statValGreen}`}>
                       ₹{driverProfile.totalEarnings}
                     </div>
                     <div className={styles.statLbl}>Total Earned</div>
                   </div>
                 </div>
 
-                {/* Driver Details List */}
                 <div className={styles.infoList}>
                   <div className={styles.infoItem}>
                     <DirectionsCarIcon fontSize="small" sx={{ color: "#64748b" }} />
@@ -159,7 +152,7 @@ export const ProfileView: React.FC = () => {
 
                   <div className={styles.infoItem}>
                     <VerifiedUserIcon fontSize="small" sx={{ color: "#10b981" }} />
-                    <span style={{ color: "#059669", fontWeight: 600 }}>
+                    <span className={styles.verifiedDocText}>
                       All Driver Documents Verified
                     </span>
                   </div>
@@ -171,7 +164,6 @@ export const ProfileView: React.FC = () => {
               </Button>
             </Box>
 
-            {/* Right Side: Driver Trip & Payout Ledger */}
             <Box className={styles.contentArea}>
               <div className={styles.headerRow}>
                 <div>
@@ -216,12 +208,12 @@ export const ProfileView: React.FC = () => {
                     </div>
 
                     <div className={styles.bookingBottom}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div className={styles.bookingBottomMeta}>
                         <span className={styles.statusChip}>✓ Completed</span>
                         <span>{b.date} • {b.time}</span>
                         <span>• Paid via UPI</span>
                       </div>
-                      <span style={{ color: "#10b981", fontWeight: 700, fontSize: "11px" }}>
+                      <span className={styles.payoutCreditBadge}>
                         ✓ Credited to HDFC Bank
                       </span>
                     </div>
@@ -231,11 +223,7 @@ export const ProfileView: React.FC = () => {
             </Box>
           </>
         ) : (
-          /* ============================================================== */
-          /* USER (RIDER) PROFILE ONLY (When logged in as User)             */
-          /* ============================================================== */
           <>
-            {/* Left User Profile Info */}
             <Box className={styles.heroBanner}>
               <div>
                 <div className={styles.profileTop}>
@@ -252,13 +240,12 @@ export const ProfileView: React.FC = () => {
                   <div className={styles.userRole}>
                     <span>★ {riderProfile.rating}</span>
                     <span>•</span>
-                    <span style={{ color: "#2563eb", fontWeight: 700 }}>
+                    <span className={styles.passengerRoleLabel}>
                       Verified Passenger
                     </span>
                   </div>
                 </div>
 
-                {/* User Stats */}
                 <div className={styles.statsRow}>
                   <div className={styles.statItem}>
                     <div className={styles.statVal}>{riderProfile.totalRides}</div>
@@ -271,14 +258,13 @@ export const ProfileView: React.FC = () => {
                   </div>
                   <div className={styles.statDivider} />
                   <div className={styles.statItem}>
-                    <div className={styles.statVal} style={{ color: "#2563eb" }}>
+                    <div className={`${styles.statVal} ${styles.statValBlue}`}>
                       ₹{riderProfile.walletBalance}
                     </div>
                     <div className={styles.statLbl}>Taxii Wallet</div>
                   </div>
                 </div>
 
-                {/* User Details List */}
                 <div className={styles.infoList}>
                   <div className={styles.infoItem}>
                     <PhoneIcon fontSize="small" sx={{ color: "#64748b" }} />
@@ -312,7 +298,6 @@ export const ProfileView: React.FC = () => {
               </Button>
             </Box>
 
-            {/* Right Side: User Ride History */}
             <Box className={styles.contentArea}>
               <div className={styles.headerRow}>
                 <div>
@@ -350,7 +335,6 @@ export const ProfileView: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Filter Tabs */}
               <div className={styles.filterTabs}>
                 {(["All", "Completed", "Active"] as const).map((filter) => (
                   <button
@@ -366,17 +350,9 @@ export const ProfileView: React.FC = () => {
                 ))}
               </div>
 
-              {/* Bookings List */}
               <div className={styles.bookingsList}>
                 {filteredBookings.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "40px 20px",
-                      color: "#64748b",
-                      fontSize: "13px",
-                    }}
-                  >
+                  <div className={styles.emptyStateMsg}>
                     No bookings found.
                   </div>
                 ) : (
@@ -397,43 +373,43 @@ export const ProfileView: React.FC = () => {
                         <div className={styles.bookingFare}>₹{b.price}</div>
                       </div>
 
-                      <div className={styles.routeTimeline}>
-                        <div className={styles.routeItem}>
-                          <div className={styles.dotGreen} />
-                          <strong>Pickup:</strong>
-                          <span>{b.pickup}</span>
-                        </div>
-                        <div className={styles.routeItem}>
-                          <div className={styles.dotRed} />
-                          <strong>Drop:</strong>
-                          <span>{b.dropoff}</span>
-                        </div>
+                    <div className={styles.routeTimeline}>
+                      <div className={styles.routeItem}>
+                        <div className={styles.dotGreen} />
+                        <strong>Pickup:</strong>
+                        <span>{b.pickup}</span>
                       </div>
-
-                      <div className={styles.bookingBottom}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span className={styles.statusChip}>{b.status}</span>
-                          <span>{b.date} • {b.time}</span>
-                          <span>• {b.paymentMethod}</span>
-                        </div>
-
-                        <button
-                          type="button"
-                          className={styles.rebookBtn}
-                          onClick={() => handleRebook(b)}
-                        >
-                          Book Again
-                        </button>
+                      <div className={styles.routeItem}>
+                        <div className={styles.dotRed} />
+                        <strong>Drop:</strong>
+                        <span>{b.dropoff}</span>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            </Box>
-          </>
-        )}
-      </Box>
+
+                    <div className={styles.bookingBottom}>
+                      <div className={styles.bookingBottomMeta}>
+                        <span className={styles.statusChip}>{b.status}</span>
+                        <span>{b.date} • {b.time}</span>
+                        <span>• {b.paymentMethod}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={styles.rebookBtn}
+                        onClick={() => handleRebook(b)}
+                      >
+                        Book Again
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Box>
+        </>
+      )}
     </Box>
+  </Box>
   );
 };
 

@@ -1,64 +1,45 @@
 "use client";
 
-import { Box, Button, Typography } from '@mui/material';
-import styles from './header.module.scss';
-import { AuthRole, AuthPage } from '../Login';
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
+import styles from "./header.module.scss";
+import { AuthRole } from "../Login";
 
 type LoginHeaderProps = {
   role: AuthRole;
   setRole: (role: AuthRole) => void;
-  page: AuthPage;
-  setPage: (page: AuthPage) => void;
 };
 
-const LoginHeader = ({ role, setRole, page, setPage }: LoginHeaderProps) => {
-  const isLoginPage = page === 'login';
-  const isCaptain = role === 'captain';
-
-  const userText = isLoginPage ? "Don't have an account?" : "Already have an account?";
-  const captainText = isLoginPage ? "Don't have a driver account?" : "Already a driver?";
-  const buttonText = isLoginPage ? 'Register' : 'Login';
+const LoginHeader = ({ role, setRole }: LoginHeaderProps) => {
+  const isCaptain = role === "captain";
 
   return (
-    <Box className={styles.header}>
+    <Box component="header" className={styles.header}>
       <Box
-        className={styles['header-logo']}
-        onClick={() => {
-          setRole('captain');
-          setPage('register');
-        }}
+        className={styles.headerLogo}
+        onClick={() => setRole("user")}
+        role="button"
+        tabIndex={0}
       >
-        <Typography sx={{ fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#000000' }}>
+        <Typography component="span" className={styles.logoTitle}>
           Rydo
         </Typography>
-        <span className={styles['captain-badge']}>{isCaptain ? 'Driver' : 'Rider'}</span>
+        <Box component="span" className={styles.captainBadge}>
+          {isCaptain ? "Driver" : "Rider"}
+        </Box>
       </Box>
 
-      <Box className={styles['header-btns']}>
-        <Typography className={styles['header-text']}>
-          {isCaptain ? captainText : userText}
+      <Box className={styles.headerBtns}>
+        <Typography component="p" className={styles.headerText}>
+          {isCaptain ? "Looking to book a ride instead?" : "Want to drive with Rydo?"}
         </Typography>
 
         <Button
-          className={styles['header-btn']}
-          onClick={() => setPage(isLoginPage ? "register" : "login")}
+          type="button"
+          className={styles.roleSwitchBtn}
+          onClick={() => setRole(isCaptain ? "user" : "captain")}
         >
-          {buttonText}
-        </Button>
-
-        <Button
-          className={styles['role-switch-btn']}
-          onClick={() => {
-            if (isCaptain) {
-              setRole('user');
-              setPage('login');
-            } else {
-              setRole('captain');
-              setPage('register');
-            }
-          }}
-        >
-          {isCaptain ? 'Rider Portal' : 'Driver Portal'}
+          {isCaptain ? "Switch to Rider Portal" : "Switch to Driver Portal"}
         </Button>
       </Box>
     </Box>
@@ -66,3 +47,5 @@ const LoginHeader = ({ role, setRole, page, setPage }: LoginHeaderProps) => {
 };
 
 export default LoginHeader;
+
+

@@ -1,15 +1,10 @@
 import UserDashboard from "@/components/dashboard/user-dashboard";
 import React from "react";
+import styles from "./dashboard.module.scss";
 
 const page = () => {
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        backgroundColor: "#f8fafc",
-      }}
-    >
+    <div className={styles.dashboardWrapper}>
       <UserDashboard />
     </div>
   );

@@ -31,7 +31,6 @@
   }
 }
 
-/* Left Profile Hero Banner */
 .heroBanner {
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   padding: 24px 20px;
@@ -156,7 +155,6 @@
   }
 }
 
-/* Right Content Area: Bookings & Activity */
 .contentArea {
   padding: 24px 28px;
   display: flex;
@@ -218,7 +216,6 @@
   }
 }
 
-/* Bookings Cards List */
 .bookingsList {
   display: flex;
   flex-direction: column;
@@ -339,4 +336,46 @@
       }
     }
   }
+}
+
+.captainRoleLabel {
+  color: #059669;
+  font-weight: 700;
+}
+
+.passengerRoleLabel {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.statValGreen {
+  color: #059669 !important;
+}
+
+.statValBlue {
+  color: #2563eb !important;
+}
+
+.verifiedDocText {
+  color: #059669;
+  font-weight: 600;
+}
+
+.bookingBottomMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payoutCreditBadge {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.emptyStateMsg {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-size: 13px;
 }

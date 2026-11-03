@@ -13,14 +13,22 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.header-logo {
+.headerLogo {
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  user-select: none;
 }
 
-.captain-badge {
+.logoTitle {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  color: #000000;
+}
+
+.captainBadge {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -31,49 +39,32 @@
   text-transform: uppercase;
 }
 
-.header-btns {
+.headerBtns {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.header-text {
+.headerText {
   font-size: 14px;
   color: #4b5563;
+  margin: 0;
 }
 
-.header-btn {
-  &.header-btn {
-    padding: 6px 16px;
-    border-radius: 20px;
-    color: #ffffff;
-    background-color: #000000;
-    text-transform: none;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
+.roleSwitchBtn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: #111827;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-    &:hover {
-      background-color: #333333;
-    }
-  }
-}
-
-.role-switch-btn {
-  &.role-switch-btn {
-    padding: 5px 14px;
-    border-radius: 20px;
-    color: #111827;
-    background-color: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    text-transform: none;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-
-    &:hover {
-      background-color: #e5e7eb;
-    }
+  &:hover {
+    background-color: #e5e7eb;
   }
 }
 
@@ -85,25 +76,16 @@
     max-height: 56px;
   }
 
-  .header-btns {
+  .headerBtns {
     gap: 6px;
   }
 
-  .header-text {
+  .headerText {
     display: none;
   }
 
-  .role-switch-btn {
-    &.role-switch-btn {
-      padding: 4px 8px;
-      font-size: 11px;
-    }
-  }
-
-  .header-btn {
-    &.header-btn {
-      padding: 4px 10px;
-      font-size: 11px;
-    }
+  .roleSwitchBtn {
+    padding: 4px 8px;
+    font-size: 11px;
   }
 }

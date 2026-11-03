@@ -7,20 +7,15 @@ import RiderExperience from "@/components/rider/RiderExperience";
 import DriverExperience from "@/components/driver/DriverExperience";
 import { useTaxii } from "@/context/TaxiiContext";
 
+import styles from "./UserDashboard.module.scss";
+
 const UserDashboard = () => {
   const { appMode } = useTaxii();
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#f8fafc",
-      }}
-    >
+    <Box className={styles.dashboardContainer}>
       <TopNav />
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Box className={styles.contentWrapper}>
         {appMode === "rider" ? <RiderExperience /> : <DriverExperience />}
       </Box>
     </Box>
